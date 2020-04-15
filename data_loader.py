@@ -37,7 +37,7 @@ class DataGenerator(DataLoader):
 
 def create_data_generators(dataset_name, domain, data_path="data", batch_size=16,
                            transformations=None, num_workers=1, split_ratios=[0.8, 0.1, 0.1],
-                           image_size=500, infinite_train=False, device=torch.device('cpu')):
+                           image_size=200, infinite_train=False, device=torch.device('cpu')):
     """
     Args:
         dataset_name (string)
@@ -73,13 +73,16 @@ def create_data_generators(dataset_name, domain, data_path="data", batch_size=16
 
     train_dataloader = DataGenerator(is_infinite=infinite_train, device=device, dataset=train_dataset,
                                      batch_size=batch_size, shuffle=True, num_workers=num_workers, drop_last=True,
-                                     collate_fn=lambda x: [elem for elem in default_collate(x)])
+                                     # collate_fn=lambda x: [elem for elem in default_collate(x)]
+                                     )
     val_dataloader = DataGenerator(is_infinite=False, device=device, dataset=val_dataset,
                                    batch_size=batch_size, shuffle=False, num_workers=num_workers,
-                                    collate_fn=lambda x: [elem for elem in default_collate(x)])
+                                    # collate_fn=lambda x: [elem for elem in default_collate(x)]
+                                   )
     test_dataloader = DataGenerator(is_infinite=False, device=device, dataset=test_dataset,
                                     batch_size=batch_size, shuffle=False, num_workers=num_workers,
-                                    collate_fn=lambda x: [elem for elem in default_collate(x)])
+                                    # collate_fn=lambda x: [elem for elem in default_collate(x)]
+                                    )
 
     return train_dataloader, val_dataloader, test_dataloader
 

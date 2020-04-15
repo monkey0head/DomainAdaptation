@@ -1,4 +1,5 @@
 import torch
+import os
 
 from trainer import Trainer
 from loss import loss_DANN
@@ -8,6 +9,7 @@ from metrics import AccuracyScoreFromLogits
 from utils.callbacks import simple_callback, ModelSaver
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+os.environ['CUDA_VISIBLE_DEVICES'] = '4'
 
 def only_loss(*args, **kwargs):
     loss, rich_loss = loss_DANN(device=device, *args, **kwargs)
