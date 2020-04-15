@@ -25,7 +25,7 @@ class Trainer:
     def train_on_batch(self, src_batch, trg_batch, opt):
         self.model.train()
         loss = self.calc_loss(src_batch, trg_batch)
-        self.last_epoch_history['loss'] += loss
+        self.last_epoch_history['loss'] += loss.data.cpu().item()
 
         opt.zero_grad()
         loss.backward()
@@ -54,6 +54,9 @@ class Trainer:
         else:
             raise NotImplementedError
 
+        if validation_data is not None:
+            src_val_data, trg_val_data = validation_data
+
         for self.epoch in range(self.epoch, n_epochs):
             self._reset_last_epoch_history()
             for step, (src_batch, trg_batch) in enumerate(zip(src_data, trg_data)):
@@ -61,12 +64,17 @@ class Trainer:
                     break
                 self.train_on_batch(src_batch, trg_batch, opt)
 
+            # validation
             if self.epoch % val_freq == 0 and validation_data is not None:
-                src_val_data, trg_val_data = validation_data
+
                 self.model.eval()
                 # calculating loss on validation
                 actual_val_steps = 0
                 for val_step, (src_batch, trg_batch) in enumerate(zip(src_val_data, trg_val_data)):
+                    print('val_step', val_step)
+                    print('actual_val_steps', actual_val_steps)
+                    if val_step == steps_per_epoch:
+                        break
                     actual_val_steps += 1
                     loss = self.calc_loss(src_batch, trg_batch).detach().cpu().item()
                     self.last_epoch_history['val_loss'] += loss
@@ -95,6 +103,7 @@ class Trainer:
             pred_classes = self.model.predict(images)
             for metric in metrics:
                 metric(true_classes, pred_classes)
+        data.reload_iterator()
         return {metric.name: metric.score for metric in metrics}
 
     def predict(self, data):

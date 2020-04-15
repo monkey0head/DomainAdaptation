@@ -75,11 +75,11 @@ def create_data_generators(dataset_name, domain, data_path="data", batch_size=16
                                      # collate_fn=lambda x: [elem for elem in default_collate(x)]
                                      )
     val_dataloader = DataGenerator(is_infinite=False, device=device, dataset=val_dataset,
-                                   batch_size=batch_size, shuffle=False, num_workers=num_workers,
+                                   batch_size=batch_size, shuffle=False, num_workers=num_workers, drop_last=True,
                                     # collate_fn=lambda x: [elem for elem in default_collate(x)]
                                    )
     test_dataloader = DataGenerator(is_infinite=False, device=device, dataset=test_dataset,
-                                    batch_size=batch_size, shuffle=False, num_workers=num_workers,
+                                    batch_size=batch_size, shuffle=False, num_workers=num_workers, drop_last=True,
                                     # collate_fn=lambda x: [elem for elem in default_collate(x)]
                                     )
 
