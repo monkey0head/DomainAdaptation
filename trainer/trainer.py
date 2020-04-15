@@ -1,5 +1,5 @@
 import torch
-
+import tqdm
 
 class Trainer:
     def __init__(self, model, loss):
@@ -31,7 +31,6 @@ class Trainer:
         loss.backward()
         opt.step()
 
-
     def _merge_batches(self, src_batch, trg_batch):
         src_images, src_classes = src_batch
         trg_images, trg_classes = trg_batch
@@ -44,6 +43,7 @@ class Trainer:
 
     def fit(self, src_data, trg_data, n_epochs=1000, steps_per_epoch=100, val_freq=1,
             opt='adam', opt_kwargs=None, validation_data=None, metrics=None, callbacks=None):
+
         self.n_epochs = n_epochs
 
         if opt_kwargs is None:
@@ -57,9 +57,9 @@ class Trainer:
         if validation_data is not None:
             src_val_data, trg_val_data = validation_data
 
-        for self.epoch in range(self.epoch, n_epochs):
+        for self.epoch in tqdm.trange(self.epoch, n_epochs):
             self._reset_last_epoch_history()
-            for step, (src_batch, trg_batch) in enumerate(zip(src_data, trg_data)):
+            for step, (src_batch, trg_batch) in tqdm.tqdm(enumerate(zip(src_data, trg_data)), total=steps_per_epoch):
                 if step == steps_per_epoch:
                     break
                 self.train_on_batch(src_batch, trg_batch, opt)
@@ -71,8 +71,6 @@ class Trainer:
                 # calculating loss on validation
                 actual_val_steps = 0
                 for val_step, (src_batch, trg_batch) in enumerate(zip(src_val_data, trg_val_data)):
-                    print('val_step', val_step)
-                    print('actual_val_steps', actual_val_steps)
                     if val_step == steps_per_epoch:
                         break
                     actual_val_steps += 1

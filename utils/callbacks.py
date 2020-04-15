@@ -1,5 +1,6 @@
 import os
 
+
 def simple_callback(model, epoch_log, current_epoch, total_epoch):
     train_loss = epoch_log['loss']
     val_loss = epoch_log['val_loss']
@@ -27,24 +28,53 @@ class ModelSaver:
         torch.save(model.state_dict(), filename)
 
 
-class Logger:
-    def __init__(self, log_name, path="_log"):
-        import json
-        from collections import defaultdict
+class HistorySaver:
+    import json
+    from collections import defaultdict
+    json = json
+    defaultdict = defaultdict
 
-        self.json = json
+    def __init__(self, log_name, path="_log", plot=True):
         self.log_name = log_name
         self.path = path
-        self.loss_history = defaultdict(list)
+        self.is_plotting = plot
+        self.loss_history = self.defaultdict(list)
+        self.src_metrics_history = self.defaultdict(list)
+        self.trg_metrics_history = self.defaultdict(list)
 
+        if plot:
+            import matplotlib.pyplot as plt
+            self.plt = plt
         if not os.path.exists(path):
             os.makedirs(path)
-        if not os.path.exists(os.path.join(path, log_name)):
-            os.makedirs(os.path.join(path, log_name))
+
+    def _plot(self, data, name, current_epoch, total_epoch):
+        self.plt.figure(figsize=(6, 4))
+        for key in data:
+            self.plt.plot(data[key], label=key)
+        self.plt.legend()
+        self.plt.title('{} history for {} epochs of {}'.format(name, current_epoch + 1, total_epoch))
+        self.plt.savefig(os.path.join(self.path, name +'_plot'))
+
+    def plot_all(self, current_epoch, total_epoch):
+        self._plot(self.loss_history, 'loss', current_epoch, total_epoch)
+        self._plot(self.src_metrics_history, 'src_metrics', current_epoch, total_epoch)
+        self._plot(self.trg_metrics_history, 'trg_metrics', current_epoch, total_epoch)
 
     def __call__(self, model, epoch_log, current_epoch, total_epoch):
-        filename = os.path.join(self.path, self.log_name, "epoch_{}.pt".format(current_epoch))
-        for item in epoch_log:
-            self.loss_history[item].append(epoch_log[item])
+        filename = os.path.join(self.path, self.log_name)
+
+        self.loss_history['loss'].append(epoch_log['loss'])
+        self.loss_history['val_loss'].append(epoch_log['val_loss'])
+
+        for metric in epoch_log['trg_metrics']:
+            self.trg_metrics_history[metric].append(epoch_log['trg_metrics'][metric])
+
+        for metric in epoch_log['src_metrics']:
+            self.src_metrics_history[metric].append(epoch_log['src_metrics'][metric])
+
+        if self.is_plotting:
+            self.plot_all(current_epoch, total_epoch)
+
         with open(filename, 'w') as f:
             self.json.dump(self.loss_history, f)
