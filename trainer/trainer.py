@@ -64,19 +64,11 @@ class Trainer:
                     break
                 self.train_on_batch(src_batch, trg_batch, opt)
 
+            self.last_epoch_history['loss'] /= steps_per_epoch
+
             # validation
             if self.epoch % val_freq == 0 and validation_data is not None:
-                print('eval on epoch ', self.epoch)
                 self.model.eval()
-                # calculating loss on validation
-                actual_val_steps = 0
-                for val_step, (src_batch, trg_batch) in enumerate(zip(src_val_data, trg_val_data)):
-                    if val_step == steps_per_epoch:
-                        break
-                    actual_val_steps += 1
-                    loss = self.calc_loss(src_batch, trg_batch).detach().cpu().item()
-                    self.last_epoch_history['val_loss'] += loss
-                self.last_epoch_history['val_loss'] /= actual_val_steps
 
                 # calculating metrics on validation
                 if metrics is not None:
@@ -87,8 +79,18 @@ class Trainer:
                         trg_metrics = self.score(trg_val_data, metrics)
                         self.last_epoch_history['trg_metrics'] = trg_metrics
 
+                # calculating loss on validation
+                if src_val_data is not None and trg_val_data is not None:
+                    actual_val_steps = 0
+                    for val_step, (src_batch, trg_batch) in enumerate(zip(src_val_data, trg_val_data)):
+                        if val_step == steps_per_epoch:
+                            break
+                        actual_val_steps += 1
+                        loss = self.calc_loss(src_batch, trg_batch).detach().cpu().item()
+                        self.last_epoch_history['val_loss'] += loss
+                    self.last_epoch_history['val_loss'] /= actual_val_steps
+
             if callbacks is not None:
-                self.last_epoch_history['loss'] /= steps_per_epoch
                 for callback in callbacks:
                     callback(self.model, self.last_epoch_history, self.epoch, n_epochs)
 
