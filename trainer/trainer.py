@@ -81,17 +81,12 @@ class Trainer:
 
                 # calculating loss on validation
                 if src_val_data is not None and trg_val_data is not None:
-                    actual_val_steps = 0
+                    val_step = 0
                     for val_step, (src_batch, trg_batch) in enumerate(zip(src_val_data, trg_val_data)):
-                        if val_step == steps_per_epoch:
-                            break
-                        actual_val_steps += 1
                         loss = self.calc_loss(src_batch, trg_batch).detach().cpu().item()
                         self.last_epoch_history['val_loss'] += loss
-                    if actual_val_steps > 0:
-                        self.last_epoch_history['val_loss'] /= actual_val_steps
-                    else:
-                        print('not enough validation data, validation loss was not calculated')
+                    if val_step:
+                        self.last_epoch_history['val_loss'] /= val_step
 
             if callbacks is not None:
                 for callback in callbacks:
