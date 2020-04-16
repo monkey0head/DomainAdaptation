@@ -93,4 +93,3 @@ class HistorySaver:
 
         if self.is_plotting:
             self.plot_all(current_epoch, total_epoch)
-
