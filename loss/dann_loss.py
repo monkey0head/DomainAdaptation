@@ -137,11 +137,11 @@ def loss_DANN(model,
     """
     model_output = model.forward(batch['src_images'])
     class_logits_on_src = model_output['class']
-    logprobs_target_on_src = torch.squeeze(model_output['domain']) # TODO: maybe put torch.squeeze in model?
+    logprobs_target_on_src = torch.squeeze(model_output['domain'], dim=-1) # TODO: maybe put torch.squeeze in model?
 
     model_output = model.forward(batch['trg_images'])
     class_logits_on_trg = model_output['class']
-    logprobs_target_on_trg = torch.squeeze(model_output['domain'])
+    logprobs_target_on_trg = torch.squeeze(model_output['domain'], dim=-1)
 
     domain_loss_weight = calc_domain_loss_weight(epoch, n_epochs)
     prediction_loss_weight = calc_prediction_loss_weight(epoch, n_epochs)
