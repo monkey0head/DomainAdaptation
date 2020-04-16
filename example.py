@@ -42,7 +42,6 @@ if __name__ == '__main__':
                                                                 infinite_train=True,
                                                                 image_size=dann_config.IMAGE_SIZE,
                                                                 num_workers=dann_config.NUM_WORKERS,
-                                                                split_ratios=[0.7, 0.2, 0.1],
                                                                 device=device)
 
     train_gen_t, val_gen_t, test_gen_t = create_data_generators(dann_config.DATASET,
@@ -51,7 +50,6 @@ if __name__ == '__main__':
                                                                 infinite_train=True,
                                                                 image_size=dann_config.IMAGE_SIZE,
                                                                 num_workers=dann_config.NUM_WORKERS,
-                                                                split_ratios=[0.7, 0.2, 0.1],
                                                                 device=device)
 
     model = DANNModel().to(device)
