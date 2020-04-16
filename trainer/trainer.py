@@ -88,7 +88,10 @@ class Trainer:
                         actual_val_steps += 1
                         loss = self.calc_loss(src_batch, trg_batch).detach().cpu().item()
                         self.last_epoch_history['val_loss'] += loss
-                    self.last_epoch_history['val_loss'] /= actual_val_steps
+                    if actual_val_steps > 0:
+                        self.last_epoch_history['val_loss'] /= actual_val_steps
+                    else:
+                        print('not enough validation data, validation loss was not calculated')
 
             if callbacks is not None:
                 for callback in callbacks:
