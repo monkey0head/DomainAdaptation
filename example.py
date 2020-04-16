@@ -9,9 +9,8 @@ from metrics import AccuracyScoreFromLogits
 from utils.callbacks import simple_callback, ModelSaver, HistorySaver
 import configs.dann_config as dann_config
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '4, 5'
+# os.environ['CUDA_VISIBLE_DEVICES'] = '4, 5'
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
 
 def only_loss(*args, **kwargs):
     loss, rich_loss = loss_DANN(device=device, *args, **kwargs)
