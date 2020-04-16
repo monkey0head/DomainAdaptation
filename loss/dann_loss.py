@@ -135,11 +135,11 @@ def loss_DANN(model,
             "prediction_loss"
         }
     """
-    model_output = model.forward(batch['src_images'])
+    model_output = model.forward(batch['src_images'].to(device))
     class_logits_on_src = model_output['class']
     logprobs_target_on_src = torch.squeeze(model_output['domain'], dim=-1) # TODO: maybe put torch.squeeze in model?
 
-    model_output = model.forward(batch['trg_images'])
+    model_output = model.forward(batch['trg_images'].to(device))
     class_logits_on_trg = model_output['class']
     logprobs_target_on_trg = torch.squeeze(model_output['domain'], dim=-1)
 
