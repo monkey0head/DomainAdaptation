@@ -66,7 +66,7 @@ class Trainer:
 
             # validation
             if self.epoch % val_freq == 0 and validation_data is not None:
-
+                print('eval on epoch ', self.epoch)
                 self.model.eval()
                 # calculating loss on validation
                 actual_val_steps = 0

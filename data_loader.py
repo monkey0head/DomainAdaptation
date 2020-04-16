@@ -35,7 +35,7 @@ class DataGenerator(DataLoader):
 
 
 def create_data_generators(dataset_name, domain, data_path="data", batch_size=16,
-                           transformations=None, num_workers=1, split_ratios=[0.8, 0.1, 0.1],
+                           transformations=None, num_workers=1, split_ratios=[0.7, 0.2, 0.1],
                            image_size=200, infinite_train=False, device=torch.device('cpu')):
     """
     Args:
