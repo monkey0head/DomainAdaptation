@@ -6,7 +6,8 @@ from loss import loss_DANN
 from models import DANNModel
 from data_loader import create_data_generators
 from metrics import AccuracyScoreFromLogits
-from utils.callbacks import simple_callback, set_lr_for_sgd, ModelSaver, HistorySaver
+from utils.callbacks import simple_callback, ModelSaver, HistorySaver
+from utils.schedulers import LRSchedulerSGD
 import configs.dann_config as dann_config
 
 # os.environ['CUDA_VISIBLE_DEVICES'] = '4, 5'
@@ -56,6 +57,7 @@ if __name__ == '__main__':
     acc = AccuracyScoreFromLogits()
     mmm = DebugMetric(acc)
 
+    scheduler = LRSchedulerSGD()
     tr = Trainer(model, only_loss)
     tr.fit(train_gen_s, train_gen_t,
            n_epochs=dann_config.N_EPOCHS,
@@ -65,5 +67,6 @@ if __name__ == '__main__':
            val_freq=dann_config.VAL_FREQ,
            opt='sgd',
            opt_kwargs={'lr': 0.01, 'momentum': 0.9},
-           callbacks=[simple_callback, set_lr_for_sgd, ModelSaver('DANN', dann_config.SAVE_MODEL_FREQ),
-                      HistorySaver('log_with_freeze', dann_config.VAL_FREQ)])
+           lr_scheduler=scheduler,
+           callbacks=[simple_callback, ModelSaver('DANN', dann_config.SAVE_MODEL_FREQ),
+                      HistorySaver('log_with_sgd', dann_config.VAL_FREQ)])
