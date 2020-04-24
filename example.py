@@ -6,7 +6,7 @@ from loss import loss_DANN
 from models import DANNModel
 from data_loader import create_data_generators
 from metrics import AccuracyScoreFromLogits
-from utils.callbacks import simple_callback, ModelSaver, HistorySaver
+from utils.callbacks import simple_callback, set_lr_for_sgd, ModelSaver, HistorySaver
 import configs.dann_config as dann_config
 
 # os.environ['CUDA_VISIBLE_DEVICES'] = '4, 5'
@@ -63,5 +63,7 @@ if __name__ == '__main__':
            metrics=[acc],
            steps_per_epoch=dann_config.STEPS_PER_EPOCH,
            val_freq=dann_config.VAL_FREQ,
-           callbacks=[simple_callback, ModelSaver('DANN', dann_config.SAVE_MODEL_FREQ),
-                      HistorySaver('test_log', dann_config.VAL_FREQ)])
+           opt='sgd',
+           opt_kwargs={'lr': 0.01, 'momentum': 0.9},
+           callbacks=[simple_callback, set_lr_for_sgd, ModelSaver('DANN', dann_config.SAVE_MODEL_FREQ),
+                      HistorySaver('log_with_freeze', dann_config.VAL_FREQ)])

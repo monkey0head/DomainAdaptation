@@ -75,16 +75,10 @@ def create_data_generators(dataset_name, domain, data_path="data", batch_size=16
 
     train_dataloader = DataGenerator(is_infinite=infinite_train, device=device, dataset=train_dataset,
                                      batch_size=batch_size, shuffle=True, num_workers=num_workers, drop_last=True)
-    if val_size != 0:
-        val_dataloader = DataGenerator(is_infinite=False, device=device, dataset=val_dataset,
-                                   batch_size=batch_size, shuffle=False, num_workers=num_workers)
-    else:
-        val_dataloader = None
-    if test_size != 0:
-        test_dataloader = DataGenerator(is_infinite=False, device=device, dataset=test_dataset,
-                                    batch_size=batch_size, shuffle=False, num_workers=num_workers)
-    else:
-        test_dataloader = None
+    val_dataloader = DataGenerator(is_infinite=False, device=device, dataset=val_dataset,
+                               batch_size=batch_size, shuffle=False, num_workers=num_workers)
+    test_dataloader = DataGenerator(is_infinite=False, device=device, dataset=test_dataset,
+                                batch_size=batch_size, shuffle=False, num_workers=num_workers)
     return train_dataloader, val_dataloader, test_dataloader
 
 
