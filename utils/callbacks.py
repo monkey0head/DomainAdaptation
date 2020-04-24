@@ -1,7 +1,7 @@
 import os
 
 
-def simple_callback(model, epoch_log, current_epoch, total_epoch):
+def simple_callback(model, opt, epoch_log, current_epoch, total_epoch):
     train_loss = epoch_log['loss']
     val_loss = epoch_log['val_loss']
     trg_metrics = epoch_log['trg_metrics']
@@ -11,6 +11,16 @@ def simple_callback(model, epoch_log, current_epoch, total_epoch):
     message_src_metrics = ' '.join(['val_src_{}: {:<10}\t'.format(k, v) for k, v in src_metrics.items()])
     message_trg_metrics = ' '.join(['val_trg_{}: {:<10}\t'.format(k, v) for k, v in trg_metrics.items()])
     print(message_head + message_loss + message_src_metrics + message_trg_metrics)
+
+
+def set_lr_for_sgd(model, opt, epoch_log, current_epoch, total_epoch):
+    mu_0 = 0.01
+    alpha = 10
+    beta = 0.75
+    p = float(current_epoch) / total_epoch
+    mu_p = mu_0 / ((1 + alpha * p) ** beta)
+    for group in opt.param_groups:
+        group['lr'] = mu_p
 
 
 class ModelSaver:
@@ -23,7 +33,7 @@ class ModelSaver:
         if not os.path.exists(os.path.join(path, model_type)):
             os.makedirs(os.path.join(path, model_type))
 
-    def __call__(self, model, epoch_log, current_epoch, total_epoch):
+    def __call__(self, model, opt, epoch_log, current_epoch, total_epoch):
         import torch
         if current_epoch % self.save_freq == 0:
             filename = os.path.join(self.path, self.model_type, "epoch_{}.pt".format(current_epoch))
@@ -75,7 +85,7 @@ class HistorySaver:
         with open(filename, 'w') as f:
             self.json.dump(data, f)
 
-    def __call__(self, model, epoch_log, current_epoch, total_epoch):
+    def __call__(self, model, opt, epoch_log, current_epoch, total_epoch):
         if current_epoch % self.val_freq == 0:
             self.loss_history['val_loss'].append(epoch_log['val_loss'])
 

@@ -1,6 +1,7 @@
 import torch
 import tqdm
 
+
 class Trainer:
     def __init__(self, model, loss):
         self.model = model
@@ -20,7 +21,7 @@ class Trainer:
     def calc_loss(self, src_batch, trg_batch):
         batch = self._merge_batches(src_batch, trg_batch)
         metadata = {'epoch': self.epoch, 'n_epochs': self.n_epochs}
-        loss = self.loss(self.model, batch, device=self.device, **metadata)
+        loss, _ = self.loss(self.model, batch, device=self.device, **metadata)
         return loss
 
     def train_on_batch(self, src_batch, trg_batch, opt):
@@ -51,7 +52,9 @@ class Trainer:
             opt_kwargs = dict()
 
         if opt == 'adam':
-            opt = torch.optim.Adam(self.model.parameters(), **opt_kwargs)
+            opt = torch.optim.Adam(self.model.parameters(), lr=0.0005, **opt_kwargs)
+        elif opt == 'sgd':
+            opt = torch.optim.SGD(self.model.parameters(), lr=0.01, momentum=0.9, **opt_kwargs)
         else:
             raise NotImplementedError
 
@@ -94,7 +97,7 @@ class Trainer:
 
             if callbacks is not None:
                 for callback in callbacks:
-                    callback(self.model, self.last_epoch_history, self.epoch, n_epochs)
+                    callback(self.model, opt, self.last_epoch_history, self.epoch, n_epochs)
 
     def score(self, data, metrics):
         for metric in metrics:
