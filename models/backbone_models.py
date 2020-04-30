@@ -1,7 +1,6 @@
 import torch.nn as nn
 
 import configs.dann_config as dann_config
-import configs.alexnet_config as alexnet_config
 
 
 def split_layers(model, layer_ids):

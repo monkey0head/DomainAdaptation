@@ -98,8 +98,8 @@ if __name__ == '__main__':
            opt_kwargs={'lr': 0.01, 'momentum': 0.9},
            lr_scheduler=scheduler,
            callbacks=[print_callback(watch=["loss", "domain_loss", "val_loss",
-                                    "val_domain_loss", 'trg_metrics', 'src_metrics']),
-                ModelSaver('DANN_resnet_freezed', dann_config.SAVE_MODEL_FREQ),
-                HistorySaver('log_resnet_amazon_dslr_freezed', dann_config.VAL_FREQ, path='_log/0430_amazon_dslr',
-                extra_losses={'domain_loss': ['domain_loss', 'val_domain_loss'],
-                                 'train_domain_loss': ['domain_loss_on_src', 'domain_loss_on_trg']})])
+                                        "val_domain_loss", 'trg_metrics', 'src_metrics']),
+                    ModelSaver('DANN_resnet_freezed', dann_config.SAVE_MODEL_FREQ),
+                    HistorySaver('log_resnet_amazon_dslr_freezed', dann_config.VAL_FREQ, path='_log/0430_amazon_dslr',
+                                 extra_losses={'domain_loss': ['domain_loss', 'val_domain_loss'],
+                                               'train_domain_loss': ['domain_loss_on_src', 'domain_loss_on_trg']})])
