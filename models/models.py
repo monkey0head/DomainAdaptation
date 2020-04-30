@@ -71,3 +71,16 @@ class DANNModel(BaseModel):
         target task.
         """
         return self.forward(input_data)["class"]
+
+
+class Alexnet(BaseModel):
+    def __init__(self):
+        super(Alexnet, self).__init__()
+        self.model = backbone_models.get_pure_alexnet()
+
+    def forward(self, input_data):
+        return self.model(input_data)
+
+    def predict(self, input_data):
+        return self.model(input_data)
+

@@ -1,6 +1,7 @@
 import torch.nn as nn
 
 import configs.dann_config as dann_config
+import configs.alexnet_config as alexnet_config
 
 
 def split_layers(model, layer_ids):
@@ -66,7 +67,7 @@ def get_alexnet():
     classifier[-2] = nn.ReLU()
     if dann_config.FREZE_BACKBONE_FEATURES:
         for i, param in enumerate(features.parameters()):
-            if i < 0: # possible: 0, 2, 4, 6, 8, 10
+            if i < 6: # possible: 0, 2, 4, 6, 8, 10
                 param.requires_grad = False
     classifier[-1] = nn.Linear(4096, dann_config.CLASSES_CNT)
     classifier_layer_ids = [1, 4, 6]
@@ -88,9 +89,12 @@ def get_resnet50():
         model.layer3,
         model.layer4,
     )
+    # print(model)
+    # for ind, (name, _) in enumerate(features.named_parameters()):
+    #     print(ind, name)
     if dann_config.FREZE_BACKBONE_FEATURES:
         for i, param in enumerate(features.parameters()):
-            if i < 141: # possible: 0, 1, 3, 33, 72, 129, 141, 159
+            if i < 159: # possible: 0, 1, 3, 33, 72, 129, 141, 159
                 param.requires_grad = False
 
     pooling = model.avgpool
@@ -130,3 +134,16 @@ def get_vanilla_dann():
     classifier_layer_ids = [0, 4, 7]
     pooling_ftrs = hidden_size
     return features, pooling, classifier, classifier_layer_ids,  hidden_size * 2, 2
+
+
+def get_pure_alexnet():
+    from torchvision.models import alexnet
+    model = alexnet(pretrained=alexnet_config.PRETRAINED)
+    features, pooling, classifier = model.features, model.avgpool, model.classifier
+    if alexnet_config.FREEZE_BACKBONE_FEATURES:
+        for i, param in enumerate(model.features.parameters()):
+            if i < alexnet_config.FREEZE_LEVEL: # possible: 0, 2, 4, 6, 8, 10
+                param.requires_grad = False
+
+    model.classifier[-1] = nn.Linear(4096, dann_config.CLASSES_CNT)
+    return model

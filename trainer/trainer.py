@@ -20,7 +20,7 @@ class Trainer:
     def calc_loss(self, src_batch, trg_batch):
         batch = self._merge_batches(src_batch, trg_batch)
         metadata = {'epoch': self.epoch, 'n_epochs': self.n_epochs}
-        loss = self.loss(self.model, batch, device=self.device, **metadata)
+        loss, _ = self.loss(self.model, batch, device=self.device, **metadata)
         return loss
 
     def train_on_batch(self, src_batch, trg_batch, opt):
