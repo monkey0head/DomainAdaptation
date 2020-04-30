@@ -5,16 +5,16 @@ from torchvision import transforms
 from trainer import Trainer
 from loss import loss_DANN
 from models import DANNModel
-from data_loader import create_data_generators
+from dataloader import create_data_generators
 from metrics import AccuracyScoreFromLogits
-from utils.callbacks import simple_callback, ModelSaver, HistorySaver
+from utils.callbacks import simple_callback, print_callback, ModelSaver, HistorySaver
 from utils.schedulers import LRSchedulerSGD
 import configs.dann_config as dann_config
 
 # os.environ['CUDA_VISIBLE_DEVICES'] = '4, 5'
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-def only_loss(*args, **kwargs):
+def debug_loss(*args, **kwargs):
     loss, rich_loss = loss_DANN(*args, **kwargs)
     # loss_string = '   '.join(['{}: {:.5f}\t'.format(k, float(v)) for k, v in rich_loss.items()])
     # print(f"step_loss: {loss_string}")
@@ -86,7 +86,8 @@ if __name__ == '__main__':
     mmm = DebugMetric(acc)
 
     scheduler = LRSchedulerSGD()
-    tr = Trainer(model, only_loss)
+    tr = Trainer(model, loss_DANN)
+
     tr.fit(train_gen_s, train_gen_t,
            n_epochs=dann_config.N_EPOCHS,
            validation_data=[val_gen_s, val_gen_t],
@@ -96,5 +97,9 @@ if __name__ == '__main__':
            opt='sgd',
            opt_kwargs={'lr': 0.01, 'momentum': 0.9},
            lr_scheduler=scheduler,
-           callbacks=[simple_callback, ModelSaver('DANN_resnet_freezed', dann_config.SAVE_MODEL_FREQ),
-                      HistorySaver('log_resnet_amazon_dslr_freezed', dann_config.VAL_FREQ, path='_log/0430_amazon_dslr')])
+           callbacks=[print_callback(watch=["loss", "domain_loss", "val_loss",
+                                    "val_domain_loss", 'trg_metrics', 'src_metrics']),
+                ModelSaver('DANN_resnet_freezed', dann_config.SAVE_MODEL_FREQ),
+                HistorySaver('log_resnet_amazon_dslr_freezed', dann_config.VAL_FREQ, path='_log/0430_amazon_dslr',
+                extra_losses={'domain_loss': ['domain_loss', 'val_domain_loss'],
+                                 'train_domain_loss': ['domain_loss_on_src', 'domain_loss_on_trg']})])
