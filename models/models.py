@@ -63,7 +63,7 @@ class DANNModel(BaseModel):
         Function for testing process when need to solve only
         target task.
         """
-        return self.forward(input_data)["class"]
+        return self.forward(input_data)["class"] 
 
 
 class OneDomainModel(BaseModel):

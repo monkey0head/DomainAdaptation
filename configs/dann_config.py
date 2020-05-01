@@ -6,18 +6,18 @@ IS_UNSUPERVISED = True
 GRADIENT_REVERSAL_LAYER_ALPHA = 1.0
 FREZE_BACKBONE_FEATURES = True
 
-BATCH_SIZE = 64
+BATCH_SIZE = 32
 
 NUM_WORKERS = 4
-N_EPOCHS = 36
-STEPS_PER_EPOCH = 10
+N_EPOCHS = 20
+STEPS_PER_EPOCH = 20
 VAL_FREQ = 1
-SAVE_MODEL_FREQ = 35
+SAVE_MODEL_FREQ = 19
 
 ################### Model dependent parameters #########################
 
 CLASSES_CNT = 31
-MODEL_BACKBONE = "resnet50" # alexnet resnet50 vanilla_dann
+MODEL_BACKBONE = "alexnet" # alexnet resnet50 vanilla_dann
 DOMAIN_HEAD = "vanilla_dann"
 BACKBONE_PRETRAINED = True
 IMAGE_SIZE = 224

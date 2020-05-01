@@ -16,47 +16,20 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 if __name__ == '__main__':
-    # transformations_s = transforms.Compose([
-    #     transforms.Resize(dann_config.IMAGE_SIZE),
-    #     transforms.ToTensor(),
-    #     transforms.Normalize(mean=[0.7920, 0.7859, 0.7839],
-    #                          std=[0.2744, 0.2790, 0.2804]),
-    # ])
-
-    train_gen_s, val_gen_s, _ = create_data_generators(dann_config.DATASET,
+    train_gen_s, val_gen_s, test_gen_s = create_data_generators(dann_config.DATASET,
                                                                 dann_config.SOURCE_DOMAIN,
                                                                 batch_size=dann_config.BATCH_SIZE,
                                                                 infinite_train=True,
                                                                 image_size=dann_config.IMAGE_SIZE,
-                                                                split_ratios=[0.9, 0.1, 0],
                                                                 num_workers=dann_config.NUM_WORKERS,
-                                                                # transformations=transformations_s,
                                                                 device=device)
-    #
-    # transformations_t = transforms.Compose([
-    #     transforms.Resize(dann_config.IMAGE_SIZE),
-    #     transforms.ToTensor(),
-    #     transforms.Normalize(mean=[0.4689, 0.4467, 0.4046],
-    #                          std=[0.1811, 0.1746, 0.1775]),
-    # ])
 
-    train_gen_t, _, _ = create_data_generators(dann_config.DATASET,
+    train_gen_t, val_gen_t, test_gen_t = create_data_generators(dann_config.DATASET,
                                                                 dann_config.TARGET_DOMAIN,
                                                                 batch_size=dann_config.BATCH_SIZE,
                                                                 infinite_train=True,
-                                                                split_ratios=[1, 0, 0],
                                                                 image_size=dann_config.IMAGE_SIZE,
                                                                 num_workers=dann_config.NUM_WORKERS,
-                                                                # transformations=transformations_t,
-                                                                device=device)
-    val_gen_t, _, _ = create_data_generators(dann_config.DATASET,
-                                                                dann_config.TARGET_DOMAIN,
-                                                                batch_size=dann_config.BATCH_SIZE,
-                                                                infinite_train=False,
-                                                                split_ratios=[1, 0, 0],
-                                                                image_size=dann_config.IMAGE_SIZE,
-                                                                num_workers=dann_config.NUM_WORKERS,
-                                                                # transformations=transformations_t,
                                                                 device=device)
 
     model = DANNModel().to(device)
@@ -64,7 +37,6 @@ if __name__ == '__main__':
 
     scheduler = LRSchedulerSGD()
     tr = Trainer(model, loss_DANN)
-
     tr.fit(train_gen_s, train_gen_t,
            n_epochs=dann_config.N_EPOCHS,
            validation_data=[val_gen_s, val_gen_t],
@@ -76,9 +48,9 @@ if __name__ == '__main__':
            lr_scheduler=scheduler,
            callbacks=[print_callback(watch=["loss", "domain_loss", "val_loss",
                                             "val_domain_loss", 'trg_metrics', 'src_metrics']),
-                      ModelSaver('DANN_resnet_freezed', dann_config.SAVE_MODEL_FREQ),
+                      ModelSaver('DANN', dann_config.SAVE_MODEL_FREQ),
                       WandbCallback(),
-                      HistorySaver('log_resnet_amazon_dslr_freezed', dann_config.VAL_FREQ, path='_log/0430_amazon_dslr',
+                      HistorySaver('log_with_sgd', dann_config.VAL_FREQ, path='_log/DANN_Resnet_sgd',
                                    extra_losses={'domain_loss': ['domain_loss', 'val_domain_loss'],
                                                  'train_domain_loss': ['domain_loss_on_src', 'domain_loss_on_trg']})])
     wandb.join()
