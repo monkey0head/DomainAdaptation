@@ -9,10 +9,10 @@ FREZE_BACKBONE_FEATURES = True
 BATCH_SIZE = 64
 
 NUM_WORKERS = 4
-N_EPOCHS = 36
+N_EPOCHS = 31
 STEPS_PER_EPOCH = 10
 VAL_FREQ = 1
-SAVE_MODEL_FREQ = 35
+SAVE_MODEL_FREQ = 20
 
 ################### Model dependent parameters #########################
 

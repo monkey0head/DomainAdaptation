@@ -11,7 +11,7 @@ from utils.callbacks import simple_callback, print_callback, ModelSaver, History
 from utils.schedulers import LRSchedulerSGD
 import configs.dann_config as dann_config
 
-# os.environ['CUDA_VISIBLE_DEVICES'] = '4, 5'
+os.environ['CUDA_VISIBLE_DEVICES'] = '4, 5'
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 def debug_loss(*args, **kwargs):
@@ -50,7 +50,7 @@ if __name__ == '__main__':
                                                                 batch_size=dann_config.BATCH_SIZE,
                                                                 infinite_train=True,
                                                                 image_size=dann_config.IMAGE_SIZE,
-                                                                split_ratios=[0.8, 0.2, 0],
+                                                                split_ratios=[0.9, 0.1, 0],
                                                                 num_workers=dann_config.NUM_WORKERS,
                                                                 # transformations=transformations_s,
                                                                 device=device)
@@ -98,8 +98,8 @@ if __name__ == '__main__':
            opt_kwargs={'lr': 0.01, 'momentum': 0.9},
            lr_scheduler=scheduler,
            callbacks=[print_callback(watch=["loss", "domain_loss", "val_loss",
-                                        "val_domain_loss", 'trg_metrics', 'src_metrics']),
-                    ModelSaver('DANN_resnet_freezed', dann_config.SAVE_MODEL_FREQ),
-                    HistorySaver('log_resnet_amazon_dslr_freezed', dann_config.VAL_FREQ, path='_log/0430_amazon_dslr',
-                                 extra_losses={'domain_loss': ['domain_loss', 'val_domain_loss'],
-                                               'train_domain_loss': ['domain_loss_on_src', 'domain_loss_on_trg']})])
+                                            "val_domain_loss", 'trg_metrics', 'src_metrics']),
+                        ModelSaver('DANN_resnet_freezed', dann_config.SAVE_MODEL_FREQ),
+                        HistorySaver('log_resnet_amazon_dslr_freezed', dann_config.VAL_FREQ, path='_log/0430_amazon_dslr',
+                                     extra_losses={'domain_loss': ['domain_loss', 'val_domain_loss'],
+                                                   'train_domain_loss': ['domain_loss_on_src', 'domain_loss_on_trg']})])
