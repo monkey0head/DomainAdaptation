@@ -1,6 +1,6 @@
 import torch
 import os
-import wandb
+# import wandb
 
 from trainer import Trainer
 from loss import loss_DANN
@@ -11,7 +11,7 @@ from utils.callbacks import simple_callback, print_callback, ModelSaver, History
 from utils.schedulers import LRSchedulerSGD
 import configs.dann_config as dann_config
 
-# os.environ['CUDA_VISIBLE_DEVICES'] = '4, 5'
+os.environ['CUDA_VISIBLE_DEVICES'] = '4, 5'
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
@@ -76,9 +76,10 @@ if __name__ == '__main__':
            lr_scheduler=scheduler,
            callbacks=[print_callback(watch=["loss", "domain_loss", "val_loss",
                                             "val_domain_loss", 'trg_metrics', 'src_metrics']),
-                      ModelSaver('DANN_resnet_freezed', dann_config.SAVE_MODEL_FREQ),
-                      WandbCallback(),
-                      HistorySaver('log_resnet_amazon_dslr_freezed', dann_config.VAL_FREQ, path='_log/0430_amazon_dslr',
+                      ModelSaver('DANN_resnet_frozen', dann_config.SAVE_MODEL_FREQ,
+                                 save_best=True, eval_metric='accuracy'),
+                      # WandbCallback(),
+                      HistorySaver('log_resnet_amazon_dslr_frozen', dann_config.VAL_FREQ, path='_log/0430_amazon_dslr',
                                    extra_losses={'domain_loss': ['domain_loss', 'val_domain_loss'],
                                                  'train_domain_loss': ['domain_loss_on_src', 'domain_loss_on_trg']})])
-    wandb.join()
+    # wandb.join()

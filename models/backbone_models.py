@@ -93,7 +93,7 @@ def get_resnet50():
     )
     if dann_config.FREZE_BACKBONE_FEATURES:
         for i, param in enumerate(features.parameters()):
-            if i < 141: # possible: 0, 1, 3, 33, 72, 129, 141, 159
+            if i < 129: # possible: 0, 1, 3, 33, 72, 129, 141, 159
                 param.requires_grad = False
 
     pooling = model.avgpool
