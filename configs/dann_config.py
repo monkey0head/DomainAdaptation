@@ -4,26 +4,28 @@ UNK_VALUE = -100  # torch default
 IS_UNSUPERVISED = True
 
 GRADIENT_REVERSAL_LAYER_ALPHA = 1.0
-FREZE_BACKBONE_FEATURES = True
-
+FREEZE_BACKBONE_FEATURES = True
+FREEZE_LEVEL = 129
 BATCH_SIZE = 64
 
 NUM_WORKERS = 4
-N_EPOCHS = 41
+N_EPOCHS = 201
 STEPS_PER_EPOCH = 10
 VAL_FREQ = 1
-SAVE_MODEL_FREQ = 40
+SAVE_MODEL_FREQ = 200
 
 ################### Model dependent parameters #########################
 
 CLASSES_CNT = 31
-MODEL_BACKBONE = "resnet50" # alexnet resnet50 vanilla_dann
+# MODEL_BACKBONE = "alexnet" # alexnet resnet50 vanilla_dann
+MODEL_BACKBONE = "resnet50_rich"
 DOMAIN_HEAD = "vanilla_dann"
 BACKBONE_PRETRAINED = True
 IMAGE_SIZE = 224
 DATASET = "office-31"
 SOURCE_DOMAIN = "amazon"
-TARGET_DOMAIN = "dslr"
+TARGET_DOMAIN = "webcam"
+# TARGET_DOMAIN = "dslr"
 
 # CLASSES_CNT = 10
 # MODEL_BACKBONE = "mnist_dann"

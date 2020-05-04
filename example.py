@@ -61,25 +61,25 @@ if __name__ == '__main__':
 
     model = DANNModel().to(device)
     acc = AccuracyScoreFromLogits()
-
-    scheduler = LRSchedulerSGD()
-    tr = Trainer(model, loss_DANN)
-
-    tr.fit(train_gen_s, train_gen_t,
-           n_epochs=dann_config.N_EPOCHS,
-           validation_data=[val_gen_s, val_gen_t],
-           metrics=[acc],
-           steps_per_epoch=dann_config.STEPS_PER_EPOCH,
-           val_freq=dann_config.VAL_FREQ,
-           opt='sgd',
-           opt_kwargs={'lr': 0.01, 'momentum': 0.9},
-           lr_scheduler=scheduler,
-           callbacks=[print_callback(watch=["loss", "domain_loss", "val_loss",
-                                            "val_domain_loss", 'trg_metrics', 'src_metrics']),
-                      ModelSaver('DANN_resnet_frozen', dann_config.SAVE_MODEL_FREQ,
-                                 save_best=True, eval_metric='accuracy'),
-                      # WandbCallback(),
-                      HistorySaver('log_resnet_amazon_dslr_frozen', dann_config.VAL_FREQ, path='_log/0430_amazon_dslr',
-                                   extra_losses={'domain_loss': ['domain_loss', 'val_domain_loss'],
-                                                 'train_domain_loss': ['domain_loss_on_src', 'domain_loss_on_trg']})])
-    # wandb.join()
+    # print(model)
+    # scheduler = LRSchedulerSGD()
+    # tr = Trainer(model, loss_DANN)
+    #
+    # tr.fit(train_gen_s, train_gen_t,
+    #        n_epochs=dann_config.N_EPOCHS,
+    #        validation_data=[val_gen_s, val_gen_t],
+    #        metrics=[acc],
+    #        steps_per_epoch=dann_config.STEPS_PER_EPOCH,
+    #        val_freq=dann_config.VAL_FREQ,
+    #        opt='sgd',
+    #        opt_kwargs={'lr': 0.01, 'momentum': 0.9},
+    #        lr_scheduler=scheduler,
+    #        callbacks=[print_callback(watch=["loss", "domain_loss", "val_loss",
+    #                                         "val_domain_loss", 'trg_metrics', 'src_metrics']),
+    #                   ModelSaver('DANN_resnet_frozen', dann_config.SAVE_MODEL_FREQ,
+    #                              save_best=True, eval_metric='accuracy'),
+    #                   # WandbCallback(),
+    #                   HistorySaver('log_resnet_amazon_dslr_frozen', dann_config.VAL_FREQ, path='_log/0430_amazon_dslr',
+    #                                extra_losses={'domain_loss': ['domain_loss', 'val_domain_loss'],
+    #                                              'train_domain_loss': ['domain_loss_on_src', 'domain_loss_on_trg']})])
+    # # wandb.join()
