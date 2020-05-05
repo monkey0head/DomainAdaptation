@@ -105,11 +105,11 @@ def calc_rev_grad_alpha(current_iteration,
 
 
 def calc_domain_loss_weight(current_iteration, total_iterations):
-    return 0.2
+    return 1
 
 
 def calc_prediction_loss_weight(current_iteration, total_iterations):
-    return 1.8
+    return 1
 
 
 def loss_DANN(model,

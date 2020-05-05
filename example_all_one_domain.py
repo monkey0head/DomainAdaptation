@@ -10,7 +10,7 @@ from utils.callbacks import simple_callback, print_callback, ModelSaver, History
 from utils.schedulers import LRSchedulerSGD
 import configs.dann_config as dann_config
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+os.environ['CUDA_VISIBLE_DEVICES'] = '6'
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 if __name__ == '__main__':
@@ -55,21 +55,14 @@ if __name__ == '__main__':
                                                                         num_workers=dann_config.NUM_WORKERS,
                                                                         device=device)
 
-            model = DANNModelFeatures().to(device)
+            model = DANNModel().to(device)
             acc = AccuracyScoreFromLogits()
 
             scheduler = LRSchedulerSGD()
             tr = Trainer(model, loss_DANN)
 
-            experiment_name = 'DANN_Resnet_rich_129'
-            details_name = '0_2_1_8'
-
-            # initial_n_epochs = dann_config.N_EPOCHS
-            #
-            # if source_domain == 'amazon':
-            #     dann_config.N_EPOCHS = 100
-            # else:
-            #     dann_config.N_EPOCHS = initial_n_epochs
+            experiment_name = 'DANN_ResNet_129'
+            details_name = ''
 
             tr.fit(train_gen_s, train_gen_t,
                    n_epochs=dann_config.N_EPOCHS,
@@ -88,7 +81,7 @@ if __name__ == '__main__':
                                               name=str(source_domain + "_" + target_domain + "_" + details_name),
                                               group=experiment_name),
                                 HistorySaver(str(experiment_name + '_' + source_domain + '_' + target_domain + "_" + details_name),
-                                             dann_config.VAL_FREQ, path=str('_log/0502_' + experiment_name + "_" + details_name),
+                                             dann_config.VAL_FREQ, path=str('_log/0504_' + experiment_name + "_" + details_name),
                                              # extra_losses={'domain_loss': ['domain_loss', 'val_domain_loss'],
                                              #               'train_domain_loss': ['domain_loss_on_src',
                                              #                                     'domain_loss_on_trg']}

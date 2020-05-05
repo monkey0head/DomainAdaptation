@@ -26,8 +26,8 @@ if __name__ == '__main__':
                                               split_ratios=[1, 0, 0],
                                               num_workers=dann_config.NUM_WORKERS,
                                               device=device)
-    # model = DANNModel().to(device)
-    model = OneDomainModel().to(device)
+    model = DANNModel().to(device)
+    # model = OneDomainModel().to(device)
     model.load_state_dict(torch.load(args.checkpoint))
     model.eval()
 

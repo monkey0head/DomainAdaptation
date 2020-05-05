@@ -1,9 +1,9 @@
 import os
 import torch
 import argparse
-import numpy
+import numpy as np
 
-from models import DANNModelFeatures
+from models import DANNModelFeatures, OneDomainModelFeatures
 from dataloader import create_data_generators_my
 from metrics import AccuracyScoreFromLogits
 import configs.dann_config as dann_config
@@ -13,12 +13,12 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 def get_classes_features(model, data):
-    predictions = []
+    features = []
     classes = []
     for images, true_classes in data:
-        predictions.append(model.get_features(images).data.cpu())
+        features.append(model.get_features(images).data.cpu())
         classes.append(true_classes)
-    return torch.cat(predictions).data.cpu().numpy(), torch.cat(classes).data.cpu().numpy()
+    return torch.cat(features).data.cpu().numpy(), torch.cat(classes).data.cpu().numpy()
 
 
 if __name__ == '__main__':
@@ -26,22 +26,30 @@ if __name__ == '__main__':
     parser.add_argument('--checkpoint', type=str, required=True, help='path to model checkpoint')
     args = parser.parse_args()
 
-    gen_t, _, _ = create_data_generators_my(dann_config.DATASET,
-                                               dann_config.TARGET_DOMAIN,
-                                               batch_size=dann_config.BATCH_SIZE,
-                                               infinite_train=False,
-                                               split_ratios=[1, 0, 0],
-                                               image_size=dann_config.IMAGE_SIZE,
-                                               num_workers=dann_config.NUM_WORKERS,
-                                               device=device)
+    for domain, name in [('amazon', 'A'), ('webcam', 'W'), ('dslr', 'D')]:
+        dann_config.TARGET_DOMAIN = domain
+        gen_t, _, _ = create_data_generators_my(dann_config.DATASET,
+                                                   dann_config.TARGET_DOMAIN,
+                                                   batch_size=dann_config.BATCH_SIZE,
+                                                   infinite_train=False,
+                                                   split_ratios=[1, 0, 0],
+                                                   image_size=dann_config.IMAGE_SIZE,
+                                                   num_workers=dann_config.NUM_WORKERS,
+                                                   device=device)
 
-    model = DANNModelFeatures().to(device)
-    model.load_state_dict(torch.load(args.checkpoint))
-    model.eval()
+        model = OneDomainModelFeatures().to(device)
+        model.load_state_dict(torch.load(args.checkpoint))
+        model.eval()
 
-    acc = AccuracyScoreFromLogits()
-    features, classes = get_classes_features(model, gen_t)
-    classes = classes.astype('int').reshape(-1, 1)
-    print(features.shape, classes.shape)
-    numpy.savetxt('./embeddings_resnet/Df.txt', features, delimiter=',', fmt='%.7f')
-    numpy.savetxt('./embeddings_resnet/Dl.txt', classes, newline=',', fmt='%d')
+        features, classes = get_classes_features(model, gen_t)
+        classes = classes.astype('int')
+        features /= np.linalg.norm(features,  axis=-1, keepdims=True)
+
+        np.savetxt(str('./embeddings/embeddings_finetuned_72_resnet/' + name +'f.txt'), features, delimiter=',', fmt='%.7f')
+
+        with open(str('./embeddings/embeddings_finetuned_72_resnet/' + name +'l.txt'), 'w') as f:
+            for idx in range(len(classes) - 1):
+                f.write(str(classes[idx].item()))
+                f.write(',')
+            f.write(str(classes[-1].item()))
+            f.write('\n')
