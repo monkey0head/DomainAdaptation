@@ -5,7 +5,9 @@ IS_UNSUPERVISED = True
 
 GRADIENT_REVERSAL_LAYER_ALPHA = 1.0
 FREEZE_BACKBONE_FEATURES = True
-FREEZE_LEVEL = 129
+# possible for AlexNet: 0, 2, 4, 6, 8, 10
+# possible for ResNet: 0, 1, 3, 33, 72, 129, 141, 159
+FREEZE_LEVEL = 72
 BATCH_SIZE = 64
 
 NUM_WORKERS = 4
@@ -17,8 +19,8 @@ SAVE_MODEL_FREQ = 100
 ################### Model dependent parameters #########################
 
 CLASSES_CNT = 31
-# MODEL_BACKBONE = "alexnet" # alexnet resnet50 vanilla_dann
-MODEL_BACKBONE = "resnet50"
+# MODEL_BACKBONE = "alexnet" # alexnet resnet50 resnet50_rich vanilla_dann
+MODEL_BACKBONE = "resnet50_rich"
 DOMAIN_HEAD = "vanilla_dann"
 BACKBONE_PRETRAINED = True
 IMAGE_SIZE = 224

@@ -119,8 +119,24 @@ def get_resnet50_rich_classifier():
         model.layer3,
         model.layer4,
     )
-    domain_input_len = 256
+    #with adaptation block
+    # domain_input_len = 256
+    #
+    # pooling = model.avgpool
+    # classifier = nn.Sequential(
+    #     nn.Linear(2048, 2048),
+    #     nn.BatchNorm1d(2048),
+    #     nn.Dropout2d(),
+    #     nn.ReLU(),
+    #     nn.Linear(2048, domain_input_len),
+    #     nn.ReLU(),
+    #     nn.Linear(domain_input_len, domain_input_len),
+    #     nn.ReLU(),
+    #     nn.Linear(domain_input_len, dann_config.CLASSES_CNT),
+    #     )
+    # classifier_layer_ids = [0, 4, 7, 9]
 
+    domain_input_len = 2048
     pooling = model.avgpool
     classifier = nn.Sequential(
         nn.Linear(2048, 2048),
@@ -128,12 +144,11 @@ def get_resnet50_rich_classifier():
         nn.Dropout2d(),
         nn.ReLU(),
         nn.Linear(2048, domain_input_len),
-        nn.ReLU(),
-        nn.Linear(domain_input_len, domain_input_len),
+        nn.BatchNorm1d(domain_input_len),
         nn.ReLU(),
         nn.Linear(domain_input_len, dann_config.CLASSES_CNT),
         )
-    classifier_layer_ids = [0, 4, 7, 9]
+    classifier_layer_ids = [0, 4, 7]
     pooling_ftrs = 2048
     pooling_output_side = 1
     return features, pooling, classifier, classifier_layer_ids, domain_input_len, 2

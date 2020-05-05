@@ -61,7 +61,7 @@ if __name__ == '__main__':
             scheduler = LRSchedulerSGD()
             tr = Trainer(model, loss_DANN)
 
-            experiment_name = 'DANN_ResNet_129'
+            experiment_name = 'DANN_ResNet_rich_frozen_72'
             details_name = ''
 
             tr.fit(train_gen_s, train_gen_t,
