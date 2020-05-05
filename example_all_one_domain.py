@@ -10,7 +10,7 @@ from utils.callbacks import simple_callback, print_callback, ModelSaver, History
 from utils.schedulers import LRSchedulerSGD
 import configs.dann_config as dann_config
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '6'
+os.environ['CUDA_VISIBLE_DEVICES'] = '2'
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 if __name__ == '__main__':
@@ -61,8 +61,8 @@ if __name__ == '__main__':
             scheduler = LRSchedulerSGD()
             tr = Trainer(model, loss_DANN)
 
-            experiment_name = 'DANN_ResNet_rich_frozen_72'
-            details_name = ''
+            experiment_name = 'DANN_ResNet_rich_frozen_141'
+            details_name = 'bottleneck_1024'
 
             tr.fit(train_gen_s, train_gen_t,
                    n_epochs=dann_config.N_EPOCHS,

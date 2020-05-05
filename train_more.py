@@ -11,11 +11,11 @@ from utils.callbacks import simple_callback, print_callback, ModelSaver, History
 from utils.schedulers import LRSchedulerSGD
 import configs.dann_config as dann_config
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '4, 5'
+os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
-def train_more(model_class, model_path, loss, lr, freeze_before, experiment_name='DANN_experiment', details_name=''):
+def train_more(model_class, model_path, loss, lr, experiment_name='DANN_experiment', details_name=''):
     train_gen_s, val_gen_s, _ = create_data_generators(dann_config.DATASET,
                                                        dann_config.SOURCE_DOMAIN,
                                                        batch_size=dann_config.BATCH_SIZE,
@@ -50,13 +50,6 @@ def train_more(model_class, model_path, loss, lr, freeze_before, experiment_name
     scheduler = LRSchedulerSGD()
     tr = Trainer(model, loss)
 
-    for i, param in enumerate(model.features.parameters()):
-        if i < freeze_before:
-            param.requires_grad = False
-
-    experiment_name = experiment_name
-    details_name = details_name
-
     tr.fit(train_gen_s, train_gen_t,
            n_epochs=dann_config.N_EPOCHS,
            validation_data=[val_gen_s, val_gen_t],
@@ -69,7 +62,7 @@ def train_more(model_class, model_path, loss, lr, freeze_before, experiment_name
            callbacks=[print_callback(watch=["loss", "domain_loss", "val_loss",
                                             "val_domain_loss", 'trg_metrics', 'src_metrics']),
                       ModelSaver(str(experiment_name + '_' + dann_config.SOURCE_DOMAIN + '_' + dann_config.TARGET_DOMAIN),
-                                 dann_config.SAVE_MODEL_FREQ, save_best=True, eval_metric='accuracy'),
+                                 dann_config.SAVE_MODEL_FREQ, save_by_schedule=False, save_best=True, eval_metric='accuracy'),
                       WandbCallback(config=dann_config,
                                     name=str(dann_config.SOURCE_DOMAIN + "_" + dann_config.TARGET_DOMAIN + "_" + details_name),
                                     group=experiment_name),
@@ -83,13 +76,11 @@ def train_more(model_class, model_path, loss, lr, freeze_before, experiment_name
     wandb.join()
 
 
-
 if __name__ == '__main__':
     train_more(
         DANNModelFeatures,
-        "./checkpoints/DANN_Resnet_frozen_amazon_webcam/best_metric_on_trg.pt",
+        "./checkpoints/DANN_ResNet_rich_141_amazon_webcam_bottleneck_256/best_metric_on_trg.pt",
         loss_DANN,
-        0.0005,
-        129,
-        experiment_name='DANN_ResNet_finetune',
-        details_name='0_5_1_5')
+        0.01,
+        experiment_name='DANN_ResNet_rich_141',
+        details_name='bottleneck_256_more')
