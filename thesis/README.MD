@@ -90,9 +90,10 @@ DANN Rich ResNet Frozen | 0.74740 |
 DANN Rich ResNet Frozen 141 | **0.86458** |
 DANN Rich ResNet Frozen 129 | 0.85807 |
 DANN Rich ResNet Frozen 72 | 0.83464 |
-DANN Rich ResNet Frozen 141 Bottleneck 256 | |
-DANN Rich ResNet Frozen 141 Bottleneck 512 | |
-DANN Rich ResNet Frozen 141 Bottleneck 1024 | |
+DANN Rich ResNet Frozen 141 Bottleneck 128 |  |
+DANN Rich ResNet Frozen 141 Bottleneck 256 | 0.86328 |
+DANN Rich ResNet Frozen 141 Bottleneck 512 | 0.84896 |
+DANN Rich ResNet Frozen 141 Bottleneck 1024 | **0.87891** |
 SPL Статья | 0.927 | 
 SPL Pure ResNet | **0.927** |
 SPL ResNet Frozen 72 | 0.862 |

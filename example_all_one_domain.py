@@ -1,5 +1,6 @@
 import torch
 import os
+import wandb
 
 from trainer import Trainer
 from loss import loss_DANN, class_prediction_loss
@@ -10,7 +11,7 @@ from utils.callbacks import simple_callback, print_callback, ModelSaver, History
 from utils.schedulers import LRSchedulerSGD
 import configs.dann_config as dann_config
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '2'
+os.environ['CUDA_VISIBLE_DEVICES'] = '6'
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 if __name__ == '__main__':
@@ -62,7 +63,10 @@ if __name__ == '__main__':
             tr = Trainer(model, loss_DANN)
 
             experiment_name = 'DANN_ResNet_rich_frozen_141'
-            details_name = 'bottleneck_1024'
+            details_name = 'bottleneck_128'
+
+            # experiment_name = 'no_labels'
+            # details_name = ''
 
             tr.fit(train_gen_s, train_gen_t,
                    n_epochs=dann_config.N_EPOCHS,
@@ -85,4 +89,6 @@ if __name__ == '__main__':
                                              # extra_losses={'domain_loss': ['domain_loss', 'val_domain_loss'],
                                              #               'train_domain_loss': ['domain_loss_on_src',
                                              #                                     'domain_loss_on_trg']}
-                                             )])
+                                             )
+            ])
+    wandb.join()

@@ -32,6 +32,7 @@ class Trainer:
         batch['src_images'] = src_images
         batch['trg_images'] = trg_images
         batch['src_classes'] = src_classes
+        trg_classes = torch.zeros_like(trg_classes)
         batch['trg_classes'] = trg_classes
         return batch
 
