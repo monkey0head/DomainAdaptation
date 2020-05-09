@@ -119,38 +119,35 @@ def get_resnet50_rich_classifier():
         model.layer3,
         model.layer4,
     )
-    #with adaptation block
-    domain_input_len = dann_config.BOTTLENECK
-
     pooling = model.avgpool
-    classifier = nn.Sequential(
-        nn.Linear(2048, 2048),
-        nn.BatchNorm1d(2048),
-        nn.Dropout2d(),
-        nn.ReLU(),
-        nn.Linear(2048, domain_input_len),
-        nn.BatchNorm1d(domain_input_len),
-        nn.ReLU(),
-        nn.Linear(domain_input_len, 2048),
-        nn.ReLU(),
-        nn.Linear(2048, dann_config.CLASSES_CNT),
-        )
-    classifier_layer_ids = [0, 4, 7, 9]
-
-    # # without adaptation block
-    # domain_input_len = 2048
-    # pooling = model.avgpool
-    # classifier = nn.Sequential(
-    #     nn.Linear(2048, 2048),
-    #     nn.BatchNorm1d(2048),
-    #     nn.Dropout2d(),
-    #     nn.ReLU(),
-    #     nn.Linear(2048, domain_input_len),
-    #     nn.BatchNorm1d(domain_input_len),
-    #     nn.ReLU(),
-    #     nn.Linear(domain_input_len, dann_config.CLASSES_CNT),
-    #     )
-    # classifier_layer_ids = [0, 4, 7]
+    if dann_config.NEED_ADAPTATION_BLOCK:
+        domain_input_len = dann_config.BOTTLENECK_SIZE
+        classifier = nn.Sequential(
+            nn.Linear(2048, 2048),
+            nn.BatchNorm1d(2048),
+            nn.Dropout2d(),
+            nn.ReLU(),
+            nn.Linear(2048, domain_input_len),
+            nn.BatchNorm1d(domain_input_len),
+            nn.ReLU(),
+            nn.Linear(domain_input_len, 2048),
+            nn.ReLU(),
+            nn.Linear(2048, dann_config.CLASSES_CNT),
+            )
+        classifier_layer_ids = [0, 4, 7, 9]
+    else:
+        domain_input_len = 2048
+        classifier = nn.Sequential(
+            nn.Linear(2048, 2048),
+            nn.BatchNorm1d(2048),
+            nn.Dropout2d(),
+            nn.ReLU(),
+            nn.Linear(2048, domain_input_len),
+            nn.BatchNorm1d(domain_input_len),
+            nn.ReLU(),
+            nn.Linear(domain_input_len, dann_config.CLASSES_CNT),
+            )
+        classifier_layer_ids = [0, 4, 7]
     pooling_ftrs = 2048
     pooling_output_side = 1
     return features, pooling, classifier, classifier_layer_ids, domain_input_len, 2

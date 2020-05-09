@@ -44,7 +44,9 @@
     
     * Добавить ADAPTATION_BLOCK как в [статье](https://arxiv.org/pdf/1412.3474.pdf) и поэкспериментировать с его размером.
      
-    `сейчас делаю`
+    `сделала, результаты довольно нестабильные. Для блока размера 1024 качество улучшилось, и для блока размер 256 осталось на примерно том же уровне. Плюс видно, что кривая роста метрики стала более гладкой. В общем, возможно, и есть какая-то польза от bottleneck, в виде избавления от лишней информации о домене, но это пока не точно`
+    DANN_Resnet_Rich_bottleneck
+    ![DANN_Resnet_Rich_bottleneck](./plots/DANN_Resnet_Rich_bottleneck.JPG)
     
     * ? Возможно, поэкспериментировать с добавлением Dropout в классификатор и доменный классификатор
     
@@ -74,10 +76,10 @@
 
 Результаты
 
-Model | A → W |
---- | --- | 
+Model | A → W | W → A |
+--- | --- | --- | 
 DANN Alexnet Статья | 0.73 |
-DANN Resnet Обзор | 0.826 |
+DANN Resnet Обзор | 0.826 | 0.661
 OneDomain ResNet Frozen | 0.6862 |
 OneDomain ResNet Frozen 141 | 0.7318 |
 OneDomain ResNet Frozen 129 | 0.74870 |
@@ -87,19 +89,29 @@ DANN ResNet Frozen** 141 | **0.76953** |
 DANN ResNet Frozen** 129 | 0.76302 |
 DANN ResNet Frozen** 72 | 0.74740 |
 DANN Rich ResNet Frozen | 0.74740 |
-DANN Rich ResNet Frozen 141 | **0.86458** |
+DANN Rich ResNet Frozen 141 | **0.85677** | 0.70916 |
 DANN Rich ResNet Frozen 129 | 0.85807 |
 DANN Rich ResNet Frozen 72 | 0.83464 |
-DANN Rich ResNet Frozen 141 Bottleneck 128 |  |
-DANN Rich ResNet Frozen 141 Bottleneck 256 | 0.86328 |
-DANN Rich ResNet Frozen 141 Bottleneck 512 | 0.84896 |
-DANN Rich ResNet Frozen 141 Bottleneck 1024 | **0.87891** |
-SPL Статья | 0.927 | 
+DANN Rich ResNet Frozen 141 Bottleneck 128 | 0.81771 |
+DANN Rich ResNet Frozen 141 Bottleneck 256 | **0.86328** | 0.70881 |
+DANN Rich ResNet Frozen 141 Bottleneck 256 domain_loss 0.5 | | **запущено** |
+DANN Rich ResNet Frozen 141 Bottleneck 512 | 0.84896 | **запущено**
+DANN Rich ResNet Frozen 141 Bottleneck 1024 | **0.87891** | **0.71626** |
+DANN Rich ResNet Frozen 141 Bottleneck 1024 domain_loss 0.5 | | **запущено** |
+DANN Rich ResNet Frozen 141 Bottleneck 2048 | 0.86068 | **запущено** 
+
+Model | A → W | W → A |
+--- | --- | --- | 
+SPL Статья | 0.927 | 0.768 |
 SPL Pure ResNet | **0.927** |
-SPL ResNet Frozen 72 | 0.862 |
+SPL ResNet Frozen 72 | 0.862 | **?** |
+SPL DANN Rich ResNet Frozen 141 after convs | 0.927 | **выгрузила** |
+SPL DANN Rich ResNet Frozen 141 before classifier | 0.923 | **выгрузила** |
+SPL DANN Rich ResNet Frozen 141 Bottleneck 256 after convs | **0.931** | **?** |
+SPL DANN Rich ResNet Frozen 141 Bottleneck 256 before bottleneck | 0.922 |
+SPL DANN Rich ResNet Frozen 141 Bottleneck 256 before classifier | 0.881 |
+SPL DANN Rich ResNet Frozen 141 Bottleneck 1024 after convs | **?** | **?** |
 
 *- это тоже самое, что и OneDomain ResNet Frozen, т.к. в DANN Resnet после выходов сверток только один слой классификатора. Доменный лос берет фичи прямо с уровня сверток. И не обновляет свертки, потому что они заморожены
 
 ** лучшее качество достигается не в конце обучения, я сама выбирала лучший результат по валидации, что в unsupervised-условиях невозможно.
-
-Модели DANN Rich Resnet нужно будет доучить, 150 эпох не хватило.
