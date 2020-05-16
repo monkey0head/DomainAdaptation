@@ -77,9 +77,9 @@ DANN Rich ResNet Frozen 129 | 0.85807 |
 DANN Rich ResNet Frozen 72 | 0.83464 |
 DANN Rich ResNet Frozen 141 Bottleneck 128 | 0.81771 |
 DANN Rich ResNet Frozen 141 Bottleneck 256 | **0.86328** | | | | | 0.70881 |
-DANN Rich ResNet Frozen 141 Bottleneck 512 | 0.84896 | | | | | **запущено** |
-DANN Rich ResNet Frozen 141 Bottleneck 1024 | **0.87891**1 | | | | | **0.71626** |
-DANN Rich ResNet Frozen 141 Bottleneck 2048 | 0.86068 | | | | |  **запущено** |
+DANN Rich ResNet Frozen 141 Bottleneck 512 | 0.84896 | | | | | 0.70810 |
+DANN Rich ResNet Frozen 141 Bottleneck 1024 | **0.87891** | | | | | **0.71626** |
+DANN Rich ResNet Frozen 141 Bottleneck 2048 | 0.86068 | | | | |  0.6985 |
 
 **Жирным** выделила лучшие результаты из моих экспериментов. 
 `Так` выделила результаты, которые сильно близки (не более, чем на 0.02) к результатам авторов обзора, которые прикрутили ResNet к DANN. 
