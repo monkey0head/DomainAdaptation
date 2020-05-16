@@ -50,8 +50,8 @@ if __name__ == '__main__':
     scheduler = LRSchedulerSGD(blocks_with_smaller_lr=dann_config.BLOCKS_WITH_SMALLER_LR)
     tr = Trainer(model, loss_DANN)
 
-    experiment_name = 'DANN_R_w_a_141_256'
-    details_name = 'd_l_0_5'
+    experiment_name = 'test_run_after_merge'
+    details_name = ''
 
     tr.fit(train_gen_s, train_gen_t,
            n_epochs=dann_config.N_EPOCHS,

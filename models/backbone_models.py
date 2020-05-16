@@ -120,7 +120,7 @@ def get_resnet50_rich_classifier():
         model.layer4,
     )
     pooling = model.avgpool
-    if dann_config.NEED_ADAPTATION_BLOCK:
+    if dann_config.NEED_ADAPTATION_BLOCK_AV:
         domain_input_len = dann_config.BOTTLENECK_SIZE
         classifier = nn.Sequential(
             nn.Linear(2048, 2048),

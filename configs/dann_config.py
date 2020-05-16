@@ -16,7 +16,7 @@ BATCH_SIZE = 64
 
 NUM_WORKERS = 4
 N_EPOCHS = 200
-STEPS_PER_EPOCH = 20
+STEPS_PER_EPOCH = 10
 VAL_FREQ = 1
 SAVE_MODEL_FREQ = 199
 
@@ -29,7 +29,7 @@ DOMAIN_HEAD = "vanilla_dann"
 DOMAIN_LOSS = 1
 CLASSIFICATION_LOSS = 2 - DOMAIN_LOSS
 BACKBONE_PRETRAINED = True
-NEED_ADAPTATION_BLOCK = True # ="True" only for alexnet, ="False" for other types
+NEED_ADAPTATION_BLOCK = False # ="True" only for alexnet, ="False" for other types
 NEED_ADAPTATION_BLOCK_AV = True
 BLOCKS_WITH_SMALLER_LR = 0 # ="2" only for alexnet, ="0" for other types
 IMAGE_SIZE = 224
