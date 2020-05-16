@@ -1,1 +1,1 @@
-from models.models import DANNModel, OneDomainModel
+from models.models import DANNModel, OneDomainModel, OneDomainModelFeatures
