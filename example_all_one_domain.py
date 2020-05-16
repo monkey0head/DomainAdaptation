@@ -12,7 +12,7 @@ from utils.callbacks import simple_callback, print_callback, ModelSaver, History
 from utils.schedulers import LRSchedulerSGD
 import configs.dann_config as dann_config
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '7'
+os.environ['CUDA_VISIBLE_DEVICES'] = '6'
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 if __name__ == '__main__':
@@ -83,7 +83,7 @@ if __name__ == '__main__':
            callbacks=[print_callback(watch=["loss", "domain_loss", "val_loss",
                                             "val_domain_loss", 'trg_metrics', 'src_metrics']),
                         ModelSaver(str(experiment_name + '_' + source_domain + '_' + target_domain + '_' + details_name),
-                                   dann_config.SAVE_MODEL_FREQ, save_by_schedule=False, save_best=True, eval_metric='accuracy'),
+                                   dann_config.SAVE_MODEL_FREQ, save_by_schedule=True, save_best=True, eval_metric='accuracy'),
                         WandbCallback(config=dann_config,
                                       name=str(source_domain + "_" + target_domain + "_" + details_name),
                                       group=experiment_name),

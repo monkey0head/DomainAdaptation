@@ -95,23 +95,25 @@ DANN Rich ResNet Frozen 72 | 0.83464 |
 DANN Rich ResNet Frozen 141 Bottleneck 128 | 0.81771 |
 DANN Rich ResNet Frozen 141 Bottleneck 256 | **0.86328** | 0.70881 |
 DANN Rich ResNet Frozen 141 Bottleneck 256 domain_loss 0.5 | | **запущено** |
-DANN Rich ResNet Frozen 141 Bottleneck 512 | 0.84896 | **запущено**
-DANN Rich ResNet Frozen 141 Bottleneck 1024 | **0.87891** | **0.71626** |
-DANN Rich ResNet Frozen 141 Bottleneck 1024 domain_loss 0.5 | | **запущено** |
-DANN Rich ResNet Frozen 141 Bottleneck 2048 | 0.86068 | **запущено** 
+DANN Rich ResNet Frozen 141 Bottleneck 512 | 0.84896 | 0.70810 |
+DANN Rich ResNet Frozen 141 Bottleneck 1024 | **0.87891** | 0.71626 |
+DANN Rich ResNet Frozen 141 Bottleneck 1024 domain_loss 0.5 | | **0.72266** |
+DANN Rich ResNet Frozen 141 Bottleneck 2048 | 0.86068 | 0.6985 |
+
+*- это тоже самое, что и OneDomain ResNet Frozen, т.к. в DANN Resnet после выходов сверток только один слой классификатора. Доменный лос берет фичи прямо с уровня сверток. И не обновляет свертки, потому что они заморожены
+
+** лучшее качество достигается не в конце обучения, я сама выбирала лучший результат по валидации, что в unsupervised-условиях невозможно.
 
 Model | A → W | W → A |
 --- | --- | --- | 
 SPL Статья | 0.927 | 0.768 |
 SPL Pure ResNet | **0.927** |
 SPL ResNet Frozen 72 | 0.862 | **?** |
-SPL DANN Rich ResNet Frozen 141 after convs | 0.927 | **выгрузила** |
-SPL DANN Rich ResNet Frozen 141 before classifier | 0.923 | **выгрузила** |
+SPL DANN Rich ResNet Frozen 141 after convs | 0.927 | 0.727 |
+SPL DANN Rich ResNet Frozen 141 before classifier | 0.923 | **0.731** |
 SPL DANN Rich ResNet Frozen 141 Bottleneck 256 after convs | **0.931** | **?** |
 SPL DANN Rich ResNet Frozen 141 Bottleneck 256 before bottleneck | 0.922 |
 SPL DANN Rich ResNet Frozen 141 Bottleneck 256 before classifier | 0.881 |
 SPL DANN Rich ResNet Frozen 141 Bottleneck 1024 after convs | **?** | **?** |
 
-*- это тоже самое, что и OneDomain ResNet Frozen, т.к. в DANN Resnet после выходов сверток только один слой классификатора. Доменный лос берет фичи прямо с уровня сверток. И не обновляет свертки, потому что они заморожены
 
-** лучшее качество достигается не в конце обучения, я сама выбирала лучший результат по валидации, что в unsupervised-условиях невозможно.
