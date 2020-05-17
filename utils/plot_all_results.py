@@ -48,4 +48,4 @@ def plot_all(path, res_name):
 
 
 if __name__ == '__main__':
-    plot_all('./_log/0501_OneDomain_ResNet_frozen_129', 'OneDomain_ResNet_frozen_129')
+    plot_all('./_log/0430_all_frozen_141', 'DANN_with_resnet_frozen_141')

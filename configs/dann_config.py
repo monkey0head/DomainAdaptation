@@ -15,30 +15,30 @@ FREEZE_LEVEL = 141
 BATCH_SIZE = 64
 
 NUM_WORKERS = 4
-
-N_EPOCHS = 401
+N_EPOCHS = 200
 STEPS_PER_EPOCH = 10
 VAL_FREQ = 1
-SAVE_MODEL_FREQ = 400
+SAVE_MODEL_FREQ = 199
 
 ################### Model dependent parameters #########################
 
 CLASSES_CNT = 31
-# MODEL_BACKBONE = "alexnet" # alexnet resnet50 resnet50_rich vanilla_dann
-MODEL_BACKBONE = "resnet50_rich"
-NEED_ADAPTATION_BLOCK = True
-BOTTLENECK_SIZE = 1024
+MODEL_BACKBONE = "resnet50_rich" # alexnet resnet50 resnet50_rich vanilla_dann
+BOTTLENECK_SIZE = 256
 DOMAIN_HEAD = "vanilla_dann"
-DOMAIN_LOSS = 0.5
+DOMAIN_LOSS = 1
 CLASSIFICATION_LOSS = 2 - DOMAIN_LOSS
 BACKBONE_PRETRAINED = True
+NEED_ADAPTATION_BLOCK = False # ="True" only for alexnet, ="False" for other types
+NEED_ADAPTATION_BLOCK_AV = True
+BLOCKS_WITH_SMALLER_LR = 0 # ="2" only for alexnet, ="0" for other types
 IMAGE_SIZE = 224
 DATASET = "office-31"
-# SOURCE_DOMAIN = "amazon"
-# TARGET_DOMAIN = "webcam"
+SOURCE_DOMAIN = "amazon"
+TARGET_DOMAIN = "webcam"
 
-SOURCE_DOMAIN = "webcam"
-TARGET_DOMAIN = "amazon"
+if NEED_ADAPTATION_BLOCK and NEED_ADAPTATION_BLOCK_AV:
+    raise RuntimeError('select only one adaptation block type')
 
 # CLASSES_CNT = 10
 # MODEL_BACKBONE = "mnist_dann"
@@ -50,7 +50,3 @@ TARGET_DOMAIN = "amazon"
 # DATASET = "mnist"
 # SOURCE_DOMAIN = "mnist"
 # TARGET_DOMAIN = "mnist-m"
-
-# assert (MODEL_BACKBONE == "alexnet" or
-#         (MODEL_BACKBONE != "alexnet" and not NEED_ADAPTATION_BLOCK and BLOCKS_WITH_SMALLER_LR == 0)), \
-#        "can't use adaptation block with non-alexnet"
