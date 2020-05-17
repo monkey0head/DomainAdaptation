@@ -3,15 +3,15 @@ import os
 import wandb
 
 from trainer import Trainer
-from loss import loss_DANN, class_prediction_loss
-from models import DANNModel, OneDomainModel
+from loss import loss_DANN, class_prediction_loss, loss_DANNCA
+from models import DANNModel, OneDomainModel, DANNCA_Model
 from dataloader import create_data_generators
 from metrics import AccuracyScoreFromLogits
 from utils.callbacks import simple_callback, print_callback, ModelSaver, HistorySaver, WandbCallback
 from utils.schedulers import LRSchedulerSGD
 import configs.dann_config as dann_config
 
-# os.environ['CUDA_VISIBLE_DEVICES'] = '4, 5'
+os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 if __name__ == '__main__':
@@ -44,14 +44,14 @@ if __name__ == '__main__':
                                              num_workers=dann_config.NUM_WORKERS,
                                              device=device)
 
-    model = DANNModel().to(device)
+    model = DANNCA_Model().to(device)
     acc = AccuracyScoreFromLogits()
 
     scheduler = LRSchedulerSGD(blocks_with_smaller_lr=dann_config.BLOCKS_WITH_SMALLER_LR)
-    tr = Trainer(model, loss_DANN)
+    tr = Trainer(model, loss_DANNCA)
 
-    experiment_name = 'test_run_after_merge'
-    details_name = ''
+    experiment_name = 'dannca_test'
+    details_name = 'lambda5'
 
     tr.fit(train_gen_s, train_gen_t,
            n_epochs=dann_config.N_EPOCHS,

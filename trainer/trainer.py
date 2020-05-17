@@ -19,10 +19,50 @@ class Trainer:
     def train_on_batch(self, src_batch, trg_batch, opt):
         self.model.train()
         loss, loss_info = self.calc_loss(src_batch, trg_batch)
-        self.loss_logger.store(loss=loss.data.cpu().item(), **loss_info)
 
-        opt.zero_grad()
-        loss.backward()
+
+        if dann_config.DANN_CA:
+            classifier_loss, feature_loss = loss
+            self.loss_logger.store(loss=classifier_loss.data.cpu().item() + feature_loss.data.cpu().item(), **loss_info)
+            opt.zero_grad()
+            classifier_loss.backward(retain_graph=True)
+            temp_grad = []
+            for param in self.model.parameters():
+                if param.requires_grad:
+                    temp_grad.append(param.grad.data.clone())
+                else:
+                    temp_grad.append(None)
+            grad_for_classifier = temp_grad
+
+            opt.zero_grad()
+            feature_loss.backward()
+            temp_grad = []
+            for param in self.model.parameters():
+                if param.requires_grad:
+                    temp_grad.append(param.grad.data.clone())
+                else:
+                    temp_grad.append(None)
+            grad_for_feature_extractor = temp_grad
+
+            # update parameters
+            count = 0
+            for param in self.model.parameters():
+                # print(count, param.shape)
+                if param.requires_grad:
+                    temp_grad = param.grad.data.clone()
+                    temp_grad.zero_()
+                    if count < 159:
+                        temp_grad = grad_for_feature_extractor[count]
+                    else:
+                        temp_grad = grad_for_classifier[count]
+                    param.grad.data = temp_grad
+                count = count + 1
+
+        else:
+            self.loss_logger.store(loss=loss.data.cpu().item(), **loss_info)
+            opt.zero_grad()
+            loss.backward()
+
         opt.step()
         
     def _merge_batches(self, src_batch, trg_batch):
@@ -87,7 +127,12 @@ class Trainer:
                 if src_val_data is not None and trg_val_data is not None:
                     for val_step, (src_batch, trg_batch) in enumerate(zip(src_val_data, trg_val_data)):
                         loss, loss_info = self.calc_loss(src_batch, trg_batch)
-                        self.loss_logger.store(prefix="val", loss=loss.data.cpu().item(), **loss_info)
+                        if dann_config.DANN_CA:
+                            classifier_loss, feature_loss = loss
+                            self.loss_logger.store(prefix="val",
+                                loss=classifier_loss.data.cpu().item() + feature_loss.data.cpu().item(), **loss_info)
+                        else:
+                            self.loss_logger.store(prefix="val", loss=loss.data.cpu().item(), **loss_info)
 
             if callbacks is not None:
                 epoch_log = dict(**self.loss_logger.get_info())

@@ -11,7 +11,7 @@ GRADIENT_REVERSAL_LAYER_ALPHA = 1.0
 FREEZE_BACKBONE_FEATURES = True
 # possible for AlexNet: 0, 2, 4, 6, 8, 10
 # possible for ResNet: 0, 1, 3, 33, 72, 129, 141, 159
-FREEZE_LEVEL = 141
+FREEZE_LEVEL = 129
 BATCH_SIZE = 64
 
 NUM_WORKERS = 4
@@ -23,14 +23,14 @@ SAVE_MODEL_FREQ = 199
 ################### Model dependent parameters #########################
 
 CLASSES_CNT = 31
-MODEL_BACKBONE = "resnet50_rich" # alexnet resnet50 resnet50_rich vanilla_dann
+MODEL_BACKBONE = "DANN-CA_simple" # alexnet resnet50 resnet50_rich vanilla_dann DANN-CA_simple
 BOTTLENECK_SIZE = 256
 DOMAIN_HEAD = "vanilla_dann"
 DOMAIN_LOSS = 1
 CLASSIFICATION_LOSS = 2 - DOMAIN_LOSS
 BACKBONE_PRETRAINED = True
 NEED_ADAPTATION_BLOCK = False # ="True" only for alexnet, ="False" for other types
-NEED_ADAPTATION_BLOCK_AV = True
+NEED_ADAPTATION_BLOCK_AV = False
 BLOCKS_WITH_SMALLER_LR = 0 # ="2" only for alexnet, ="0" for other types
 IMAGE_SIZE = 224
 DATASET = "office-31"
@@ -50,3 +50,7 @@ if NEED_ADAPTATION_BLOCK and NEED_ADAPTATION_BLOCK_AV:
 # DATASET = "mnist"
 # SOURCE_DOMAIN = "mnist"
 # TARGET_DOMAIN = "mnist-m"
+
+# DANN_CA
+DANN_CA = True
+LAMBDA = 5
