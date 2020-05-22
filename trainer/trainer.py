@@ -9,7 +9,7 @@ class Trainer:
         self.epoch = 0
         self.device = next(self.model.parameters()).device
         self.loss_logger = AvgLossLogger()
-   
+
     def calc_loss(self, src_batch, trg_batch):
         batch = self._merge_batches(src_batch, trg_batch)
         metadata = {'epoch': self.epoch, 'n_epochs': self.n_epochs}
@@ -51,10 +51,16 @@ class Trainer:
                 if param.requires_grad:
                     temp_grad = param.grad.data.clone()
                     temp_grad.zero_()
-                    if count < 159:
-                        temp_grad = grad_for_feature_extractor[count]
+                    if dann_config.ALTERNATING_UPDATE:
+                        if count < dann_config.FEATURES_END and self.epoch % 2 == 0:
+                            temp_grad = grad_for_feature_extractor[count]
+                        elif count >= dann_config.FEATURES_END and self.epoch % 2 == 1:
+                            temp_grad = grad_for_classifier[count]
                     else:
-                        temp_grad = grad_for_classifier[count]
+                        if count < dann_config.FEATURES_END:
+                            temp_grad = grad_for_feature_extractor[count]
+                        elif count >= dann_config.FEATURES_END:
+                            temp_grad = grad_for_classifier[count]
                     param.grad.data = temp_grad
                 count = count + 1
 

@@ -42,8 +42,8 @@ def _loss_DANNCA_splitted(
     feature_loss = feature_loss_on_src + dann_config.LAMBDA * feature_loss_on_trg
 
     return [classifier_loss, feature_loss], {
-            "classifier_loss_on_src": classifier_loss_on_src.data.cpu().item() / source_len,
-            "classifier_loss_on_trg": classifier_loss_on_trg.data.cpu().item() / target_len,
+            "classifier_loss_on_src": classifier_loss_on_src.data.cpu().item(),
+            "classifier_loss_on_trg": classifier_loss_on_trg.data.cpu().item(),
             "feature_loss_on_src": feature_loss_on_src.data.cpu().item(),
             "feature_loss_on_trg": feature_loss_on_trg.data.cpu().item(),
             "classifier_loss": classifier_loss.data.cpu().item(),

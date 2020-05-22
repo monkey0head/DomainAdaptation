@@ -64,7 +64,7 @@ class ModelSaver:
                 torch.save(model.state_dict(), filename)
                 self.best_metric = epoch_log['trg_metrics'][self.eval_metric]
 
-        if self.save_by_schedule and current_epoch % self.save_freq == 0:
+        if self.save_by_schedule and current_epoch != 0 and current_epoch % self.save_freq == 0:
             filename = os.path.join(self.path, self.model_type, "epoch_{}.pt".format(current_epoch))
             torch.save(model.state_dict(), filename)
 

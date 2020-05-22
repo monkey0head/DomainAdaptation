@@ -54,6 +54,9 @@ def get_backbone_model():
     elif dann_config.MODEL_BACKBONE == 'DANN-CA_simple':
         features, pooling, classifier, \
             classifier_layer_ids, domain_input_len, classifier_before_domain_cnt = get_resnet50_for_DANN_CA()
+    elif dann_config.MODEL_BACKBONE == 'DANN-CA_rich':
+        features, pooling, classifier, \
+            classifier_layer_ids, domain_input_len, classifier_before_domain_cnt = get_resnet50_for_DANN_CA_rich()
     elif dann_config.MODEL_BACKBONE == 'vanilla_dann' and not dann_config.BACKBONE_PRETRAINED:
         features, pooling, classifier, \
             classifier_layer_ids, domain_input_len, classifier_before_domain_cnt = get_vanilla_dann()
@@ -136,6 +139,76 @@ def get_resnet50_for_DANN_CA():
     return features, pooling, classifier, classifier_layer_ids, domain_input_len, 2
 
 
+def get_resnet50_for_DANN_CA_rich():
+    from torchvision.models import resnet50
+    model = resnet50(pretrained=dann_config.BACKBONE_PRETRAINED)
+    features = nn.Sequential(
+        model.conv1,
+        model.bn1,
+        model.relu,
+        model.maxpool,
+        model.layer1,
+        model.layer2,
+        model.layer3,
+        model.layer4,
+    )
+    pooling = model.avgpool
+    domain_input_len = 1024
+    if dann_config.LONG_CLS and dann_config.NEED_ADAPTATION_BLOCK_AV:
+        # print('here')
+        domain_input_len = dann_config.BOTTLENECK_SIZE
+        classifier = nn.Sequential(
+            nn.Linear(2048, 2048),
+            nn.BatchNorm1d(2048),
+            nn.Dropout2d(dann_config.DROPOUT), # was 0.5
+            nn.ReLU(),
+            nn.Linear(2048, domain_input_len),
+            nn.BatchNorm1d(domain_input_len),
+            nn.Dropout2d(0.05), # was 0.5
+            nn.ReLU(),
+            nn.Linear(domain_input_len, 2048),
+            nn.BatchNorm1d(2048),
+            nn.Dropout2d(dann_config.DROPOUT),
+            nn.ReLU(),
+            nn.Linear(2048, dann_config.CLASSES_CNT + 1),
+        )
+        classifier_layer_ids = [0, 4, 8, 12]
+    elif dann_config.LONG_CLS:
+        classifier = nn.Sequential(
+            nn.Linear(2048, 2048),
+            nn.BatchNorm1d(2048),
+            nn.Dropout2d(dann_config.DROPOUT), # was 0.5
+            nn.ReLU(),
+            nn.Linear(2048, domain_input_len),
+            nn.BatchNorm1d(domain_input_len),
+            nn.Dropout2d(dann_config.DROPOUT), # was 0.5
+            nn.ReLU(),
+            nn.Linear(domain_input_len, domain_input_len),
+            nn.BatchNorm1d(domain_input_len),
+            nn.Dropout2d(dann_config.DROPOUT),
+            nn.ReLU(),
+            nn.Linear(domain_input_len, dann_config.CLASSES_CNT + 1),
+        )
+        classifier_layer_ids = [0, 4, 8, 12]
+    else:
+        classifier = nn.Sequential(
+            nn.Linear(2048, 2048),
+            nn.BatchNorm1d(2048),
+            nn.Dropout2d(dann_config.DROPOUT),
+            nn.ReLU(),
+            nn.Linear(2048, domain_input_len),
+            nn.BatchNorm1d(domain_input_len),
+            nn.Dropout2d(dann_config.DROPOUT),
+            nn.ReLU(),
+            nn.Linear(domain_input_len, dann_config.CLASSES_CNT + 1),
+        )
+        classifier_layer_ids = [0, 4, 8]
+        # classifier_layer_ids = [0, 4, 8] old
+    pooling_ftrs = 2048
+    pooling_output_side = 1
+    return features, pooling, classifier, classifier_layer_ids, domain_input_len, 2
+
+
 def get_resnet50_rich_classifier():
     from torchvision.models import resnet50
     model = resnet50(pretrained=dann_config.BACKBONE_PRETRAINED)
@@ -166,7 +239,7 @@ def get_resnet50_rich_classifier():
             )
         classifier_layer_ids = [0, 4, 7, 9]
     else:
-        domain_input_len = 2048
+        domain_input_len = 1024
         classifier = nn.Sequential(
             nn.Linear(2048, 2048),
             nn.BatchNorm1d(2048),
