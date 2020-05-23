@@ -38,13 +38,14 @@ if __name__ == '__main__':
                                                    device=device)
 
         model = DANNCA_Model().to(device)
+        # model = DANNModel().to(device)
         model.load_state_dict(torch.load(args.checkpoint))
         model.eval()
 
         features, classes = get_classes_features(model, gen_t)
         classes = classes.astype('int')
         features /= np.linalg.norm(features,  axis=-1, keepdims=True)
-        embeddings_name = 'dann_ca_after_conv'
+        embeddings_name = 'dann-ca_141_after_conv'
 
         path = './embeddings/' + embeddings_name
         if not os.path.exists(path):

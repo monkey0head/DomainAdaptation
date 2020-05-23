@@ -75,6 +75,11 @@ def _loss_DANN_splitted(
     crossentropy = torch.nn.CrossEntropyLoss(ignore_index=unk_value, reduction='sum')
     prediction_loss_on_src = crossentropy(class_logits_on_src, true_labels_on_src)
     prediction_loss_on_trg = crossentropy(class_logits_on_trg, true_labels_on_trg)
+    if dann_config.ENTROPY_REG:
+        probs_on_trg = torch.nn.Softmax(-1)(class_logits_on_trg)
+        entropy_loss_on_trg = - dann_config.ENTROPY_REG_COEF * \
+                              torch.sum(torch.log(probs_on_trg) * probs_on_trg, dim=1).mean()
+        prediction_loss_on_trg += entropy_loss_on_trg
     n_known = (true_labels_on_src != unk_value).sum() + \
               (true_labels_on_trg != unk_value).sum()
     prediction_loss = (prediction_loss_on_src + prediction_loss_on_trg) / n_known

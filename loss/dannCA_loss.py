@@ -34,11 +34,20 @@ def _loss_DANNCA_splitted(
 
     classifier_loss_on_src = crossentropy(class_logits_on_src, true_labels_on_src)
     classifier_loss_on_trg = - torch.mean(torch.log_softmax(class_logits_on_trg, dim=-1)[:, -1])
+
+    if dann_config.ENTROPY_REG:
+        probs_on_trg = torch.nn.Softmax(-1)(class_logits_on_trg[:, : -1])
+        entropy_loss_on_trg = - dann_config.ENTROPY_REG_COEF * \
+                              torch.sum(torch.log(probs_on_trg) * probs_on_trg, dim=1).mean()
+        classifier_loss_on_trg += entropy_loss_on_trg
+
     classifier_loss = classifier_loss_on_src + classifier_loss_on_trg
 
     feature_loss_on_src = crossentropy(class_logits_on_src[:, : -1], true_labels_on_src)
     feature_loss_on_trg = - torch.mean(torch.log(torch.ones_like(true_labels_on_trg) -
                                                  torch.softmax(class_logits_on_trg, dim=-1)[:, -1]))
+    if dann_config.ENTROPY_REG:
+        feature_loss_on_trg -= entropy_loss_on_trg
     feature_loss = feature_loss_on_src + dann_config.LAMBDA * feature_loss_on_trg
 
     return [classifier_loss, feature_loss], {

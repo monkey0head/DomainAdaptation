@@ -8,10 +8,10 @@ from models import DANNModel, OneDomainModel, DANNCA_Model
 from dataloader import create_data_generators
 from metrics import AccuracyScoreFromLogits
 from utils.callbacks import simple_callback, print_callback, ModelSaver, HistorySaver, WandbCallback
-from utils.schedulers import LRSchedulerSGD
+from utils.schedulers import LRSchedulerSGD, DANNCASchedulerSGD
 import configs.dann_config as dann_config
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '4'
+os.environ['CUDA_VISIBLE_DEVICES'] = '7'
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 if not torch.cuda.is_available():
@@ -50,15 +50,17 @@ if __name__ == '__main__':
                                              device=device,
                                              random_seed=None)
 
-    experiment_name = 'DANN_ResNet_rich_141_bn_256'
+    # experiment_name = 'test'
+    experiment_name = 'DANN-CA_rich_141_entropy_02'
     details_name = ''
 
     for i in range(3):
-        model = DANNModel().to(device)
+        # model = DANNModel().to(device)
+        model = DANNCA_Model().to(device)
         acc = AccuracyScoreFromLogits()
-
-        scheduler = LRSchedulerSGD(blocks_with_smaller_lr=dann_config.BLOCKS_WITH_SMALLER_LR)
-        tr = Trainer(model, loss_DANN)
+        # print(model)
+        scheduler = DANNCASchedulerSGD(base_lr=dann_config.LR)
+        tr = Trainer(model, loss_DANNCA)
 
         print(experiment_name, details_name)
         tr.fit(train_gen_s, train_gen_t,
@@ -68,7 +70,8 @@ if __name__ == '__main__':
                steps_per_epoch=dann_config.STEPS_PER_EPOCH,
                val_freq=dann_config.VAL_FREQ,
                opt='sgd',
-               opt_kwargs={'lr': 0.01, 'momentum': 0.9},
+               opt_kwargs={'lr': dann_config.LR, 'momentum': 0.9},
+               # opt_kwargs={'lr': dann_config.LR},
                lr_scheduler=scheduler,
                callbacks=[
                    print_callback(watch=["loss", "domain_loss", "val_loss",
@@ -92,4 +95,4 @@ if __name__ == '__main__':
                                 #                                     'domain_loss_on_trg']}
                                 )
                ])
-    wandb.join()
+    # wandb.join()

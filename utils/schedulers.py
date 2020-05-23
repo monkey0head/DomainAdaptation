@@ -12,3 +12,14 @@ class LRSchedulerSGD:
             param_group['lr'] = 0.1 * mu_p
         for param_group in opt.param_groups[self.blocks_with_smaller_lr:]:
             param_group['lr'] = mu_p
+
+class DANNCASchedulerSGD:
+    def __init__(self, gamma=0.1, power=0.5, base_lr=0.01):
+        self.gamma = gamma
+        self.power = power
+        self.base_lr = base_lr
+
+    def step(self, opt, current_epoch, total_epoch):
+        for param_group in opt.param_groups:
+            param_group['lr'] = self.base_lr * (1 + self.gamma * current_epoch) ** (-self.power)
+            # print(param_group)

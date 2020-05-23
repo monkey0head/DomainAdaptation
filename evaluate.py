@@ -8,7 +8,7 @@ from dataloader import create_data_generators
 from metrics import AccuracyScoreFromLogits
 import configs.dann_config as dann_config
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '4'
+os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 if __name__ == '__main__':
@@ -26,6 +26,7 @@ if __name__ == '__main__':
                                               split_ratios=[1, 0, 0],
                                               num_workers=dann_config.NUM_WORKERS,
                                               device=device)
+    # model = DANNModel().to(device)
     model = DANNCA_Model().to(device)
     # model = OneDomainModel().to(device)
     # print(model)

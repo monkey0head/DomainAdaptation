@@ -110,7 +110,7 @@ class DANNCA_Model(BaseModel):
     def __init__(self):
         super(DANNCA_Model, self).__init__()
         self.features, self.pooling, self.class_classifier, \
-        domain_input_len, self.classifier_before_domain_cnt = backbone_models.get_backbone_model()
+        _, _ = backbone_models.get_backbone_model()
 
     def forward(self, input_data):
         """
@@ -212,5 +212,3 @@ class OneDomainModel(BaseModel):
         target task.
         """
         return self.forward(input_data)["class"]     
-
-

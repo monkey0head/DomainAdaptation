@@ -14,6 +14,7 @@ FREEZE_BACKBONE_FEATURES = True
 FREEZE_LEVEL = 141
 BATCH_SIZE = 64
 
+LR = 0.01
 NUM_WORKERS = 4
 N_EPOCHS = 200
 STEPS_PER_EPOCH = 10
@@ -23,7 +24,8 @@ SAVE_MODEL_FREQ = 199
 ################### Model dependent parameters #########################
 
 CLASSES_CNT = 31
-MODEL_BACKBONE = "resnet50_rich" # alexnet resnet50 resnet50_rich vanilla_dann DANN-CA_simple DANN-CA_rich
+MODEL_BACKBONE = "DANN-CA_rich" # alexnet resnet50 resnet50_rich vanilla_dann DANN-CA_simple DANN-CA_rich
+# MODEL_BACKBONE = "resnet50_rich" # alexnet resnet50 resnet50_rich vanilla_dann DANN-CA_simple DANN-CA_rich
 # BOTTLENECK_SIZE = 256
 DOMAIN_HEAD = "vanilla_dann"
 DOMAIN_LOSS = 1
@@ -36,6 +38,8 @@ IMAGE_SIZE = 224
 DATASET = "office-31"
 SOURCE_DOMAIN = "amazon"
 TARGET_DOMAIN = "webcam"
+ENTROPY_REG = True
+ENTROPY_REG_COEF = 0.2
 
 
 # CLASSES_CNT = 10
@@ -50,14 +54,15 @@ TARGET_DOMAIN = "webcam"
 # TARGET_DOMAIN = "mnist-m"
 
 # DANN_CA
-DANN_CA = False
+DANN_CA = True
 LAMBDA = 1
 FEATURES_END = 159
 ALTERNATING_UPDATE = False
-LONG_CLS = False
-NEED_ADAPTATION_BLOCK_AV = True
+LONG_CLS = True
+NEED_ADAPTATION_BLOCK_AV = False
 BOTTLENECK_SIZE = 256
 DROPOUT = 0.2
+
 
 if NEED_ADAPTATION_BLOCK and NEED_ADAPTATION_BLOCK_AV:
     raise RuntimeError('select only one adaptation block type')

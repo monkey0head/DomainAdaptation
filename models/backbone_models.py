@@ -128,12 +128,14 @@ def get_resnet50_for_DANN_CA():
     pooling = model.avgpool
     classifier = nn.Sequential(
         nn.Linear(2048, 256),
-        nn.Dropout2d(),
+        # nn.Dropout2d(),
+        nn.ReLU(),
+        nn.Linear(256, 256),
         nn.ReLU(),
         nn.Linear(256, dann_config.CLASSES_CNT + 1),
         )
     domain_input_len = 256
-    classifier_layer_ids = [0, 4]
+    classifier_layer_ids = [0, 2, 4]
     pooling_ftrs = 2048
     pooling_output_side = 1
     return features, pooling, classifier, classifier_layer_ids, domain_input_len, 2
@@ -153,7 +155,7 @@ def get_resnet50_for_DANN_CA_rich():
         model.layer4,
     )
     pooling = model.avgpool
-    domain_input_len = 1024
+    domain_input_len = 512
     if dann_config.LONG_CLS and dann_config.NEED_ADAPTATION_BLOCK_AV:
         # print('here')
         domain_input_len = dann_config.BOTTLENECK_SIZE
@@ -179,13 +181,13 @@ def get_resnet50_for_DANN_CA_rich():
             nn.BatchNorm1d(2048),
             nn.Dropout2d(dann_config.DROPOUT), # was 0.5
             nn.ReLU(),
-            nn.Linear(2048, domain_input_len),
-            nn.BatchNorm1d(domain_input_len),
+            nn.Linear(2048, domain_input_len * 2),
+            nn.BatchNorm1d(domain_input_len * 2),
             nn.Dropout2d(dann_config.DROPOUT), # was 0.5
             nn.ReLU(),
-            nn.Linear(domain_input_len, domain_input_len),
+            nn.Linear(domain_input_len * 2, domain_input_len),
             nn.BatchNorm1d(domain_input_len),
-            nn.Dropout2d(dann_config.DROPOUT),
+            nn.Dropout2d(dann_config.DROPOUT / 2),
             nn.ReLU(),
             nn.Linear(domain_input_len, dann_config.CLASSES_CNT + 1),
         )
