@@ -24,7 +24,7 @@ SAVE_MODEL_FREQ = 199
 ################### Model dependent parameters #########################
 
 CLASSES_CNT = 31
-MODEL_BACKBONE = "DANN-CA_rich" # alexnet resnet50 resnet50_rich vanilla_dann DANN-CA_simple DANN-CA_rich
+MODEL_BACKBONE = "resnet50_rich" # alexnet resnet50 resnet50_rich vanilla_dann DANN-CA_simple DANN-CA_rich
 # MODEL_BACKBONE = "resnet50_rich" # alexnet resnet50 resnet50_rich vanilla_dann DANN-CA_simple DANN-CA_rich
 # BOTTLENECK_SIZE = 256
 DOMAIN_HEAD = "vanilla_dann"
@@ -54,7 +54,7 @@ ENTROPY_REG_COEF = 0.2
 # TARGET_DOMAIN = "mnist-m"
 
 # DANN_CA
-DANN_CA = True
+DANN_CA = False
 LAMBDA = 1
 FEATURES_END = 159
 ALTERNATING_UPDATE = False
