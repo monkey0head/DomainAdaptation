@@ -3,15 +3,15 @@ import os
 import wandb
 
 from trainer import Trainer
-from loss import loss_DANN, class_prediction_loss, loss_DANNCA
-from models import DANNModel, OneDomainModel, DANNCA_Model
+from loss import loss_DANN, class_prediction_loss, loss_DANNCA, loss_DADA
+from models import DANNModel, OneDomainModel, DANNCA_Model, DADA_Model
 from dataloader import create_data_generators
 from metrics import AccuracyScoreFromLogits
 from utils.callbacks import simple_callback, print_callback, ModelSaver, HistorySaver, WandbCallback
 from utils.schedulers import LRSchedulerSGD, DANNCASchedulerSGD
 import configs.dann_config as dann_config
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '7'
+os.environ['CUDA_VISIBLE_DEVICES'] = '5'
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 if not torch.cuda.is_available():
@@ -51,16 +51,19 @@ if __name__ == '__main__':
                                              random_seed=None)
 
     # experiment_name = 'test'
-    experiment_name = 'DANN-CA_rich_141_entropy_02'
+    experiment_name = 'DADA_rich_129_w_a'
+    # experiment_name = 'ResNet_129_visda'
     details_name = ''
 
+    print(len(val_gen_s.dataset))
+
     for i in range(3):
-        # model = DANNModel().to(device)
-        model = DANNCA_Model().to(device)
+        model = DADA_Model().to(device)
+        # model = DANNCA_Model().to(device)
         acc = AccuracyScoreFromLogits()
         # print(model)
-        scheduler = DANNCASchedulerSGD(base_lr=dann_config.LR)
-        tr = Trainer(model, loss_DANNCA)
+        scheduler = LRSchedulerSGD()
+        tr = Trainer(model, loss_DADA)
 
         print(experiment_name, details_name)
         tr.fit(train_gen_s, train_gen_t,
@@ -81,7 +84,7 @@ if __name__ == '__main__':
                                   dann_config.TARGET_DOMAIN + '_' + details_name),
                               dann_config.SAVE_MODEL_FREQ,
                               save_by_schedule=True,
-                              save_best=True,
+                              save_best=False,
                               eval_metric='accuracy'),
                    WandbCallback(config=dann_config,
                                  name=str(dann_config.SOURCE_DOMAIN + "_" + dann_config.TARGET_DOMAIN +

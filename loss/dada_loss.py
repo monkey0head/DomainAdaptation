@@ -2,106 +2,79 @@ import numpy as np
 import torch
 import configs.dann_config as dann_config
 
-
 # call loss_DANN instead of this function
-def _loss_DANN(
-        class_predictions_logits,
-        logprobs_target,
-        instances_labels,
-        is_target,
-        domain_loss_weight,
-        prediction_loss_weight,
-        unk_value=dann_config.UNK_VALUE,
-        device=torch.device('cpu')
-):
-    """
-    :param class_predictions_logits: Tensor, shape = (batch_size, n_classes).
-        Raw (NO logsoftmax).
-    :param logprobs_target: Tensor, shape = (batch_size,):
-        logprobs that domain is target.
-    :param instances_labels: np.Array, shape = (batch_size,)
-    :param is_target: np.Array, shape = (batch_size,)
-    :param domain_loss_weight: weight of domain loss
-    :param prediction_loss_weight: weight of prediction loss
-    :param unk_value: value that means that true label is unknown
-    """
-    instances_labels = instances_labels.long()
-    is_target = is_target.float()
-
-    crossentropy = torch.nn.CrossEntropyLoss(ignore_index=unk_value)
-    prediction_loss = crossentropy(class_predictions_logits, instances_labels)
-    binary_crossentropy = torch.nn.BCEWithLogitsLoss()
-    domain_loss = binary_crossentropy(logprobs_target, is_target)
-    loss = domain_loss_weight * domain_loss \
-           + prediction_loss_weight * prediction_loss
-    return loss
-
-
-# call loss_DANN instead of this function
-def _loss_DANN_splitted(
+def _loss_DADA_splitted(
+        lambda_,
         class_logits_on_src,
         class_logits_on_trg,
-        logprobs_target_on_src,
-        logprobs_target_on_trg,
         true_labels_on_src,
         true_labels_on_trg,
-        domain_loss_weight,
-        prediction_loss_weight,
         unk_value=dann_config.UNK_VALUE,
-        device=torch.device('cpu'),
-):
-    """
-    :param class_logits_on_src: Tensor, shape = (batch_size, n_classes).
-    :param class_logits_on_trg: Tensor, shape = (batch_size, n_classes).
-    :param logprobs_target_on_src: Tensor, shape = (batch_size,):
-    :param logprobs_target_on_trg: Tensor, shape = (batch_size,):
-    :param true_labels_on_src: np.Array, shape = (batch_size,)
-    :param true_labels_on_trg: np.Array, shape = (batch_size,)
-    :param domain_loss_weight: weight of domain loss
-    :param prediction_loss_weight: weight of prediction loss
-    :param unk_value: value that means that true class label is unknown
-    """
-    # TARGET_DOMAIN_IDX is 1
-    source_len = len(class_logits_on_src)
+        device=torch.device('cpu')):
+
     target_len = len(class_logits_on_trg)
     true_labels_on_src = torch.as_tensor(true_labels_on_src).long()
     if dann_config.IS_UNSUPERVISED:
         true_labels_on_trg = unk_value * torch.ones(target_len, dtype=torch.long, device=device)
     else:
         true_labels_on_trg = torch.as_tensor(true_labels_on_trg).long()
-    is_target_on_src = torch.zeros(source_len, dtype=torch.float, device=device)
-    is_target_on_trg = torch.ones(target_len, dtype=torch.float, device=device)
 
-    crossentropy = torch.nn.CrossEntropyLoss(ignore_index=unk_value, reduction='sum')
-    prediction_loss_on_src = crossentropy(class_logits_on_src, true_labels_on_src)
-    prediction_loss_on_trg = crossentropy(class_logits_on_trg, true_labels_on_trg)
-    if dann_config.ENTROPY_REG:
-        probs_on_trg = torch.nn.Softmax(-1)(class_logits_on_trg)
-        entropy_loss_on_trg = - dann_config.ENTROPY_REG_COEF * \
-                              torch.sum(torch.log(probs_on_trg) * probs_on_trg, dim=1).mean()
-        prediction_loss_on_trg += entropy_loss_on_trg
-    n_known = (true_labels_on_src != unk_value).sum() + \
-              (true_labels_on_trg != unk_value).sum()
-    prediction_loss = (prediction_loss_on_src + prediction_loss_on_trg) / n_known
+    # classification loss source
+    probs_all_src = torch.nn.Softmax(-1)(class_logits_on_src)
+    # print(probs_all_src[:1])
+    loss_source = - torch.mean(
+        (torch.ones(len(class_logits_on_src), dtype=torch.long, device=device) - probs_all_src[:, -1]) *\
+        torch.log(probs_all_src[torch.arange(probs_all_src.size(0)), true_labels_on_src]
+                  ) +
+                  probs_all_src[:, -1] *
+                  torch.log(
+                      (torch.ones(len(class_logits_on_src), dtype=torch.long, device=device) -
+                       probs_all_src[torch.arange(probs_all_src.size(0)), true_labels_on_src.flatten()]))
+                               )
 
-    binary_crossentropy = torch.nn.BCEWithLogitsLoss(reduction='sum')
-    domain_loss_on_src = binary_crossentropy(logprobs_target_on_src, is_target_on_src)
-    domain_loss_on_trg = binary_crossentropy(logprobs_target_on_trg, is_target_on_trg)
-    domain_loss = (domain_loss_on_src + domain_loss_on_trg) / (source_len + target_len)
-    loss = domain_loss_weight * domain_loss \
-           + prediction_loss_weight * prediction_loss
-    
-    return loss, {
-        "domain_loss_on_src": domain_loss_on_src.data.cpu().item() / source_len,
-        "domain_loss_on_trg": domain_loss_on_trg.data.cpu().item() / target_len,
-        "domain_loss": domain_loss.data.cpu().item(),
-        "prediction_loss_on_src": prediction_loss_on_src.data.cpu().item(),
-        "prediction_loss_on_trg": prediction_loss_on_trg.data.cpu().item(),
-        "prediction_loss": prediction_loss.data.cpu().item()
+    crossentropy = torch.nn.CrossEntropyLoss(ignore_index=unk_value, reduction='mean')
+    # loss_source = - torch.mean(torch.log(probs_all_src[torch.arange(probs_all_src.size(0)), true_labels_on_src]))
+    # print(probs_all_src[torch.arange(probs_all_src.size(0)), true_labels_on_src.flatten()].shape)
+    # print('probs_all_src', probs_all_src[torch.arange(probs_all_src.size(0)), true_labels_on_src.flatten()])
+    # loss_source = crossentropy(class_logits_on_src, true_labels_on_src)
+
+    # print('loss_source', loss_source)
+    # loss target
+    probs_all_trg = torch.nn.Softmax(-1)(class_logits_on_trg)
+    probs_real_trg = torch.div(probs_all_trg, torch.ones((len(probs_all_trg), 1), dtype=torch.long, device=device) - probs_all_trg[:, -1].reshape(-1,1))
+    probs_real_trg[:, -1] = 0
+
+    probs_trg_hat = (probs_all_trg / (probs_all_trg + probs_all_trg[:, -1].reshape(-1, 1)))[:, :-1]
+    # print('probs_trg_hat.shape', probs_trg_hat.shape)
+    # print('probs_trg_hat', probs_trg_hat)
+
+    loss_trg_classifier = - torch.sum(torch.log(probs_trg_hat) * probs_real_trg[:, :-1], dim=-1).mean()
+    # print('loss_trg_classifier', loss_trg_classifier)
+    loss_trg_generator = torch.sum(probs_real_trg[:, :-1] * torch.log(torch.ones_like(probs_trg_hat) - probs_trg_hat), dim=-1).mean()
+    # print('loss_trg_generator', loss_trg_generator)
+
+    entropy_loss_on_trg = torch.sum(torch.log(probs_real_trg + 10e-6) * probs_real_trg, dim=-1).mean()
+
+    # print('entropy_loss_on_trg', entropy_loss_on_trg)
+    # loss_trg_classifier = torch.zeros([1], dtype=torch.long, device=device)
+    # loss_trg_generator = torch.zeros([1], dtype=torch.long, device=device)
+    # entropy_loss_on_trg = torch.zeros([1], dtype=torch.long, device=device)
+    # print(lambda_)
+    loss_min = lambda_ * (loss_source + loss_trg_classifier) + entropy_loss_on_trg
+    loss_max = lambda_ * (loss_source + loss_trg_generator) - entropy_loss_on_trg
+
+    return [loss_min, loss_max], {
+            "classifier_loss_on_src": loss_source.data.cpu().item(),
+            "loss_trg_classifier": loss_trg_classifier.data.cpu().item(),
+            "loss_trg_generator": loss_trg_generator.data.cpu().item(),
+            "entropy_loss_on_trg": - entropy_loss_on_trg.data.cpu().item(),
+            "loss_min": loss_min.data.cpu().item(),
+            "loss_max": loss_max.data.cpu().item(),
+            "lambda": lambda_
     }
 
 
-def calc_rev_grad_alpha(current_iteration,
+def calc_lambda(current_iteration,
                         total_iterations,
                         gamma=dann_config.LOSS_GAMMA):
     progress = current_iteration / total_iterations
@@ -109,15 +82,7 @@ def calc_rev_grad_alpha(current_iteration,
     return lambda_p
 
 
-def calc_domain_loss_weight(current_iteration, total_iterations):
-    return dann_config.DOMAIN_LOSS
-
-
-def calc_prediction_loss_weight(current_iteration, total_iterations):
-    return dann_config.CLASSIFICATION_LOSS
-
-
-def loss_DANN(model,
+def loss_DADA(model,
               batch,
               epoch,
               n_epochs,
@@ -145,25 +110,18 @@ def loss_DANN(model,
             "prediction_loss"
         }
     """
-    rev_grad_alpha = calc_rev_grad_alpha(epoch, n_epochs)
+    lambda_ = calc_lambda(epoch, n_epochs)
     
-    model_output = model.forward(batch['src_images'].to(device), rev_grad_alpha)
+    model_output = model.forward(batch['src_images'].to(device))
     class_logits_on_src = model_output['class']
-    logprobs_target_on_src = torch.squeeze(model_output['domain'], dim=-1) # TODO: maybe put torch.squeeze in model?
 
-    model_output = model.forward(batch['trg_images'].to(device), rev_grad_alpha)
+    model_output = model.forward(batch['trg_images'].to(device))
     class_logits_on_trg = model_output['class']
-    logprobs_target_on_trg = torch.squeeze(model_output['domain'], dim=-1)
 
-    domain_loss_weight = calc_domain_loss_weight(epoch, n_epochs)
-    prediction_loss_weight = calc_prediction_loss_weight(epoch, n_epochs)
-    return _loss_DANN_splitted(
+    return _loss_DADA_splitted(
+        lambda_,
         class_logits_on_src,
         class_logits_on_trg,
-        logprobs_target_on_src,
-        logprobs_target_on_trg,
         true_labels_on_src=batch['src_classes'],
         true_labels_on_trg=batch['trg_classes'],
-        domain_loss_weight=domain_loss_weight,
-        prediction_loss_weight=prediction_loss_weight,
         device=device)

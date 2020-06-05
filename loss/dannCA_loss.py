@@ -8,6 +8,7 @@ def _loss_DANNCA_splitted(
         class_logits_on_trg,
         true_labels_on_src,
         true_labels_on_trg,
+        domain_loss_weight,
         unk_value=dann_config.UNK_VALUE,
         device=torch.device('cpu'),
 ):
@@ -26,8 +27,6 @@ def _loss_DANNCA_splitted(
         true_labels_on_trg = unk_value * torch.ones(target_len, dtype=torch.long, device=device)
     else:
         true_labels_on_trg = torch.as_tensor(true_labels_on_trg).long()
-    is_target_on_src = torch.zeros(source_len, dtype=torch.float, device=device)
-    is_target_on_trg = torch.ones(target_len, dtype=torch.float, device=device)
 
     crossentropy = torch.nn.CrossEntropyLoss(ignore_index=unk_value, reduction='mean')
     # print('class_logits_on_src[:, :, : -1] shape = ', class_logits_on_src[:, : -1].shape)
@@ -47,8 +46,8 @@ def _loss_DANNCA_splitted(
     feature_loss_on_trg = - torch.mean(torch.log(torch.ones_like(true_labels_on_trg) -
                                                  torch.softmax(class_logits_on_trg, dim=-1)[:, -1]))
     if dann_config.ENTROPY_REG:
-        feature_loss_on_trg -= entropy_loss_on_trg
-    feature_loss = feature_loss_on_src + dann_config.LAMBDA * feature_loss_on_trg
+        feature_loss_on_trg -= dann_config.ENTROPY_REG_COEF * entropy_loss_on_trg
+    feature_loss = domain_loss_weight * (feature_loss_on_src +  feature_loss_on_trg)
 
     return [classifier_loss, feature_loss], {
             "classifier_loss_on_src": classifier_loss_on_src.data.cpu().item(),
@@ -60,9 +59,15 @@ def _loss_DANNCA_splitted(
         }
 
 
-def calc_domain_loss_weight(current_iteration, total_iterations):
-    return dann_config.DOMAIN_LOSS
+# def calc_domain_loss_weight(current_iteration, total_iterations):
+#     return dann_config.DOMAIN_LOSS
 
+def calc_domain_loss_weight(current_iteration,
+                        total_iterations,
+                        gamma=dann_config.LOSS_GAMMA):
+    progress = current_iteration / total_iterations
+    lambda_p = 2 / (1 + np.exp(-gamma * progress)) - 1
+    return lambda_p
 
 def loss_DANNCA(model,
               batch,
@@ -91,9 +96,12 @@ def loss_DANNCA(model,
     model_output = model.forward(batch['trg_images'].to(device))
     class_logits_on_trg = model_output['class']
 
+    domain_loss_weight = calc_domain_loss_weight(epoch, n_epochs)
+
     return _loss_DANNCA_splitted(
         class_logits_on_src,
         class_logits_on_trg,
         true_labels_on_src=batch['src_classes'],
         true_labels_on_trg=batch['trg_classes'],
+        domain_loss_weight=domain_loss_weight,
         device=device)

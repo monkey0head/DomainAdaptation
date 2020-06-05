@@ -51,11 +51,11 @@ if __name__ == '__main__':
                                              random_seed=None)
 
     # experiment_name = 'test'
-    experiment_name = 'DANN_rich_141_w_a'
+    experiment_name = 'DANN_rich_141_w_a_entropy_05'
     # experiment_name = 'ResNet_129_visda'
     details_name = ''
 
-    print(len(val_gen_s.dataset))
+    print(len(val_gen_t.dataset))
 
     for i in range(3):
         model = DANNModel().to(device)
