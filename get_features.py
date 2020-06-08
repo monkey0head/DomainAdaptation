@@ -1,9 +1,12 @@
+"""
+Code to download features data vectors from convolution layers or before classifier layer
+"""
 import os
 import torch
 import argparse
 import numpy as np
 
-from models import DANNModel, DANNCA_Model
+from models import OneDomainModel, DANNModel, DANNCA_Model, DADA_Model
 from dataloader import create_data_generators_my
 from metrics import AccuracyScoreFromLogits
 import configs.dann_config as dann_config
@@ -37,7 +40,7 @@ if __name__ == '__main__':
                                                    num_workers=dann_config.NUM_WORKERS,
                                                    device=device)
 
-        # model = DANNCA_Model().to(device)
+        # select model type: OneDomainModel, DANNModel, DANNCA_Model, DADA_Model
         model = DANNModel().to(device)
         model.load_state_dict(torch.load(args.checkpoint))
         model.eval()

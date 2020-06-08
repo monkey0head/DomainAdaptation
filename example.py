@@ -1,3 +1,6 @@
+"""
+Code to train the model 3 times and plot results localy and to wandb. Config the process in configs/dann_config
+"""
 import torch
 import os
 import wandb
@@ -11,7 +14,7 @@ from utils.callbacks import simple_callback, print_callback, ModelSaver, History
 from utils.schedulers import LRSchedulerSGD, DANNCASchedulerSGD
 import configs.dann_config as dann_config
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '5'
+# os.environ['CUDA_VISIBLE_DEVICES'] = '2'
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 if not torch.cuda.is_available():
@@ -25,7 +28,7 @@ if __name__ == '__main__':
                                                        batch_size=dann_config.BATCH_SIZE,
                                                        infinite_train=True,
                                                        image_size=dann_config.IMAGE_SIZE,
-                                                       split_ratios=[0.9, 0.1, 0],
+                                                       split_ratios=[0.95, 0.5, 0],
                                                        num_workers=dann_config.NUM_WORKERS,
                                                        device=device,
                                                        random_seed=None)
@@ -44,26 +47,23 @@ if __name__ == '__main__':
                                              dann_config.TARGET_DOMAIN,
                                              batch_size=dann_config.BATCH_SIZE,
                                              infinite_train=False,
-                                             split_ratios=[1, 0, 0],
+                                             split_ratios=[0.1, 0, 0],
                                              image_size=dann_config.IMAGE_SIZE,
                                              num_workers=dann_config.NUM_WORKERS,
                                              device=device,
                                              random_seed=None)
 
-    # experiment_name = 'test'
-    experiment_name = 'DADA_rich_129_w_a'
-    # experiment_name = 'ResNet_129_visda'
+    experiment_name = 'DANN_rich_129_a_w_entropy_1'
     details_name = ''
 
-    print(len(val_gen_s.dataset))
-
     for i in range(3):
-        model = DADA_Model().to(device)
-        # model = DANNCA_Model().to(device)
+        # select model type: OneDomainModel, DANNModel, DANNCA_Model, DADA_Model
+        model = DANNModel().to(device)
         acc = AccuracyScoreFromLogits()
-        # print(model)
+        # select custom lr scheduler from utils/schedulers
         scheduler = LRSchedulerSGD()
-        tr = Trainer(model, loss_DADA)
+        # select loss function for selected model from class_prediction_loss, loss_DANN, loss_DANNCA, loss_DADA
+        tr = Trainer(model, loss_DANN)
 
         print(experiment_name, details_name)
         tr.fit(train_gen_s, train_gen_t,
@@ -74,7 +74,6 @@ if __name__ == '__main__':
                val_freq=dann_config.VAL_FREQ,
                opt='sgd',
                opt_kwargs={'lr': dann_config.LR, 'momentum': 0.9},
-               # opt_kwargs={'lr': dann_config.LR},
                lr_scheduler=scheduler,
                callbacks=[
                    print_callback(watch=["loss", "domain_loss", "val_loss",
@@ -93,9 +92,5 @@ if __name__ == '__main__':
                    HistorySaver(str(experiment_name + '_' + dann_config.SOURCE_DOMAIN + '_' +
                                     dann_config.TARGET_DOMAIN + "_" + details_name),
                                 dann_config.VAL_FREQ, path=str('_log/' + experiment_name + "_" + details_name),
-                                # extra_losses={'domain_loss': ['domain_loss', 'val_domain_loss'],
-                                #               'train_domain_loss': ['domain_loss_on_src',
-                                #                                     'domain_loss_on_trg']}
                                 )
                ])
-    # wandb.join()

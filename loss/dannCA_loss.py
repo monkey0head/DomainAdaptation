@@ -12,13 +12,6 @@ def _loss_DANNCA_splitted(
         unk_value=dann_config.UNK_VALUE,
         device=torch.device('cpu'),
 ):
-    """
-    :param class_logits_on_src: Tensor, shape = (batch_size, n_classes).
-    :param class_logits_on_trg: Tensor, shape = (batch_size, n_classes).
-    :param true_labels_on_src: np.Array, shape = (batch_size,)
-    :param true_labels_on_trg: np.Array, shape = (batch_size,)
-    :param unk_value: value that means that true class label is unknown
-    """
     # TARGET_DOMAIN_IDX is 1
     source_len = len(class_logits_on_src)
     target_len = len(class_logits_on_trg)
@@ -29,7 +22,6 @@ def _loss_DANNCA_splitted(
         true_labels_on_trg = torch.as_tensor(true_labels_on_trg).long()
 
     crossentropy = torch.nn.CrossEntropyLoss(ignore_index=unk_value, reduction='mean')
-    # print('class_logits_on_src[:, :, : -1] shape = ', class_logits_on_src[:, : -1].shape)
 
     classifier_loss_on_src = crossentropy(class_logits_on_src, true_labels_on_src)
     classifier_loss_on_trg = - torch.mean(torch.log_softmax(class_logits_on_trg, dim=-1)[:, -1])
@@ -59,9 +51,6 @@ def _loss_DANNCA_splitted(
         }
 
 
-# def calc_domain_loss_weight(current_iteration, total_iterations):
-#     return dann_config.DOMAIN_LOSS
-
 def calc_domain_loss_weight(current_iteration,
                         total_iterations,
                         gamma=dann_config.LOSS_GAMMA):
@@ -74,22 +63,7 @@ def loss_DANNCA(model,
               epoch,
               n_epochs,
               device=torch.device('cpu')):
-    """
-    :param model: model.forward(images) should return dict with keys
-        'class' : Tensor, shape = (batch_size, n_classes)  logits  of classes (raw, not logsoftmax)
-        'domain': Tensor, shape = (batch_size,) logprob for domain
-    :param batch: dict with keys
-        'src_images':
-        'trg_images':
-        'src_classes':np.Array, shape = (batch_size,)
-        'trg_classes':np.Array, shape = (batch_size,)
-    if true_class is unknown, then class should be dann_config.UNK_VALUE
-    :param epoch: current number of iteration
-    :param n_epochs: total number of iterations
-    :return:
-        classifier_loss, features_loss : torch.Tensor,
-        }
-    """
+
     model_output = model.forward(batch['src_images'].to(device))
     class_logits_on_src = model_output['class']
 

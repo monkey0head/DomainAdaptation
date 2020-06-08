@@ -3,8 +3,8 @@ import os
 import wandb
 
 from trainer import Trainer
-from loss import loss_DANN, class_prediction_loss, loss_DANNCA
-from models import DANNModel, OneDomainModel, DANNCA_Model
+from loss import loss_DANN, class_prediction_loss, loss_DANNCA, loss_DADA
+from models import DANNModel, OneDomainModel, DANNCA_Model, DADA_Model
 from dataloader import create_data_generators
 from metrics import AccuracyScoreFromLogits
 from utils.callbacks import simple_callback, print_callback, ModelSaver, HistorySaver, WandbCallback
@@ -44,26 +44,26 @@ if __name__ == '__main__':
                                              dann_config.TARGET_DOMAIN,
                                              batch_size=dann_config.BATCH_SIZE,
                                              infinite_train=False,
-                                             split_ratios=[0.2, 0, 0],
+                                             split_ratios=[1, 0, 0],
                                              image_size=dann_config.IMAGE_SIZE,
                                              num_workers=dann_config.NUM_WORKERS,
                                              device=device,
                                              random_seed=None)
 
     # experiment_name = 'test'
-    experiment_name = 'DANN_rich_141_w_a_entropy_05'
+    experiment_name = 'ResNet_129_w_a'
     # experiment_name = 'ResNet_129_visda'
     details_name = ''
 
-    print(len(val_gen_t.dataset))
+    print(len(val_gen_s.dataset))
 
     for i in range(3):
-        model = DANNModel().to(device)
+        model = OneDomainModel().to(device)
         # model = DANNCA_Model().to(device)
         acc = AccuracyScoreFromLogits()
         # print(model)
         scheduler = LRSchedulerSGD()
-        tr = Trainer(model, loss_DANN)
+        tr = Trainer(model, class_prediction_loss)
 
         print(experiment_name, details_name)
         tr.fit(train_gen_s, train_gen_t,

@@ -160,8 +160,6 @@ class Trainer:
         for images, true_classes in data:
             pred_classes = self.model.predict(images)
             for metric in metrics:
-                # print(true_classes)
-                # print(torch.argmax(pred_classes, dim=-1))
                 metric(true_classes, pred_classes)
         data.reload_iterator()
         return {metric.name: metric.score for metric in metrics}
